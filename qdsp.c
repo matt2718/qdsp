@@ -83,11 +83,11 @@ QDSPplot *qdspInit(const char *title) {
 	glBindVertexArray(plot->vertArrayObj);
 
 	glBindBuffer(GL_ARRAY_BUFFER, plot->vertBufferObjX);
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+	glVertexAttribPointer(0, 1, GL_FLOAT, GL_FALSE, 0, NULL);
 	glEnableVertexAttribArray(0);
 
 	glBindBuffer(GL_ARRAY_BUFFER, plot->vertBufferObjY);
-	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+	glVertexAttribPointer(1, 1, GL_FLOAT, GL_FALSE, 0, NULL);
 	glEnableVertexAttribArray(1);
 
 	// default bounds
@@ -104,16 +104,17 @@ QDSPplot *qdspInit(const char *title) {
 }
 
 void qdspSetBounds(QDSPplot *plot, double xMin, double xMax, double yMin, double yMax) {
-	plot->xMin = xMin;
-	plot->xMax = xMax;
-	plot->yMin = yMin;
-	plot->yMax = yMax;
+	glUseProgram(plot->shaderProgram);
+	glUniform1f(glGetUniformLocation(plot->shaderProgram, "xMin"), xMin);
+	glUniform1f(glGetUniformLocation(plot->shaderProgram, "xMax"), xMax);
+	glUniform1f(glGetUniformLocation(plot->shaderProgram, "yMin"), yMin);
+	glUniform1f(glGetUniformLocation(plot->shaderProgram, "yMax"), yMax);
 }
 
 void qdspSetPointColor(QDSPplot *plot, float red, float green, float blue) {
-	int location = glGetUniformLocation(plot->shaderProgram, "pointColor");
 	glUseProgram(plot->shaderProgram);
-	glUniform4f(location, red, green, blue, 1.0f);
+	glUniform4f(glGetUniformLocation(plot->shaderProgram, "pointColor"),
+	            red, green, blue, 1.0f);
 }
 
 void qdspSetBGColor(QDSPplot *plot, float red, float green, float blue) {
@@ -142,10 +143,10 @@ int qdspUpdate(QDSPplot *plot, void *x, void *y, int numVerts, QDSPtype type) {
 		xy2vert(plot, x, y, vertices, numVerts, type);
 
 		glBindBuffer(GL_ARRAY_BUFFER, plot->vertBufferObjX);
-		glBufferData(GL_ARRAY_BUFFER, 3 * numVerts * sizeof(float), vertices, GL_STREAM_DRAW);
+		glBufferData(GL_ARRAY_BUFFER, numVerts * sizeof(float), vertices, GL_STREAM_DRAW);
 
 		glBindBuffer(GL_ARRAY_BUFFER, plot->vertBufferObjY);
-		glBufferData(GL_ARRAY_BUFFER, 3 * numVerts * sizeof(float), vertices, GL_STREAM_DRAW);
+		glBufferData(GL_ARRAY_BUFFER, numVerts * sizeof(float), vertices + numVerts, GL_STREAM_DRAW);
 
 		free(vertices);
 
@@ -221,8 +222,8 @@ static void xy2vert(QDSPplot *plot, void *x, void *y, float *vertices,
 			break;
 		}
 			
-		vertices[3*i + 0] = (float)(2 * (xval - plot->xMin) / (plot->xMax - plot->xMin) - 1);
-		vertices[3*i + 1] = (float)(2 * (yval - plot->yMin) / (plot->yMax - plot->yMin) - 1);
-		vertices[3*i + 2] = 0.0f;
+		vertices[i] = (float)xval;
+		vertices[numVerts + i] = (float)yval;
+		vertices[2*numVerts + i] = 0.0f;
 	}
 }
