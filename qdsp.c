@@ -9,12 +9,15 @@
 
 #include "qdsp.h"
 
-// shader sources
 static int makeShader(char *buf, int size, GLenum type);
+
 static void resizeCallback(GLFWwindow *window, int width, int height);
 
-QDSPplot qdspInit(const char *title) {
-	QDSPplot plot;
+static void xy2vert(QDSPplot *plot, void *x, void *y, float *vertices,
+                    int numVerts, QDSPtype type);
+
+QDSPplot *qdspInit(const char *title) {
+	QDSPplot *plot = malloc(sizeof(QDSPplot));
 	// create context
 	glfwInit();
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
@@ -22,22 +25,22 @@ QDSPplot qdspInit(const char *title) {
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 	
 	// make window, basic config
-	plot.window = glfwCreateWindow(800, 600, title, NULL, NULL);
-	if (plot.window == NULL) {
+	plot->window = glfwCreateWindow(800, 600, title, NULL, NULL);
+	if (plot->window == NULL) {
 		fprintf(stderr, "Couldn't create window\n");
 		glfwTerminate();
-		plot.success = 0;
-		return plot;
+		free(plot);
+		return NULL;
 	}
-	glfwMakeContextCurrent(plot.window);
-	glfwSetFramebufferSizeCallback(plot.window, resizeCallback);
+	glfwMakeContextCurrent(plot->window);
+	glfwSetFramebufferSizeCallback(plot->window, resizeCallback);
 
 	// load extensions via GLAD
 	if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) {
 		fprintf(stderr, "Couldn't initialize GLAD\n");
 		glfwTerminate();
-		plot.success = 0;
-		return plot;
+		free(plot);
+		return NULL;
 	}
 
 	// create shaders and link program
@@ -47,47 +50,54 @@ QDSPplot qdspInit(const char *title) {
 
 	if (vertexShader == 0 || fragmentShader == 0) {
 		glfwTerminate();
-		plot.success = 0;
-		return plot;
+		free(plot);
+		return NULL;
 	}
 
-	plot.shaderProgram = glCreateProgram();
-	glAttachShader(plot.shaderProgram, vertexShader);
-	glAttachShader(plot.shaderProgram, fragmentShader);
-	glLinkProgram(plot.shaderProgram);
+	plot->shaderProgram = glCreateProgram();
+	glAttachShader(plot->shaderProgram, vertexShader);
+	glAttachShader(plot->shaderProgram, fragmentShader);
+	glLinkProgram(plot->shaderProgram);
 
 	int success;
-	glGetProgramiv(plot.shaderProgram, GL_LINK_STATUS, &success);
+	glGetProgramiv(plot->shaderProgram, GL_LINK_STATUS, &success);
 	if (!success) {
 		char log[1024];
-		glGetProgramInfoLog(plot.shaderProgram, 1024, NULL, log);
+		glGetProgramInfoLog(plot->shaderProgram, 1024, NULL, log);
 		fprintf(stderr, "Error linking program\n");
 		fprintf(stderr, "%s\n", log);
 		glfwTerminate();
-		plot.success = 0;
-		return plot;
+		free(plot);
+		return NULL;
 	}
 
 	glDeleteShader(vertexShader);
 	glDeleteShader(fragmentShader);
 
 	// buffer/array setup
-	glGenVertexArrays(1, &plot.vertArrayObj);
-	glGenBuffers(1, &plot.vertBufferObj);
+	glGenVertexArrays(1, &plot->vertArrayObj);
+	glGenBuffers(1, &plot->vertBufferObj);
 
-	glBindVertexArray(plot.vertArrayObj);
-	glBindBuffer(GL_ARRAY_BUFFER, plot.vertBufferObj);
+	glBindVertexArray(plot->vertArrayObj);
+	glBindBuffer(GL_ARRAY_BUFFER, plot->vertBufferObj);
 	//glBufferData(GL_ARRAY_BUFFER, 3 * numVerts * sizeof(float), vertices, GL_STREAM_DRAW);
 
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
 	glEnableVertexAttribArray(0);
 
-	clock_gettime(CLOCK_MONOTONIC, &plot.lastTime);
-	plot.success = 1;
+	clock_gettime(CLOCK_MONOTONIC, &plot->lastTime);
+
 	return plot;
 }
 
-int qdspUpdate(QDSPplot *plot, float *vertices, int numVerts) {
+void qdspSetBounds(QDSPplot *plot, double xMin, double xMax, double yMin, double yMax) {
+	plot->xMin = xMin;
+	plot->xMax = xMax;
+	plot->yMin = yMin;
+	plot->yMax = yMax;
+}
+
+int qdspUpdate(QDSPplot *plot, void *x, void *y, int numVerts, QDSPtype type) {
 	struct timespec lastTime = plot->lastTime;
 	struct timespec newTime;
 	clock_gettime(CLOCK_MONOTONIC, &newTime);
@@ -101,15 +111,15 @@ int qdspUpdate(QDSPplot *plot, float *vertices, int numVerts) {
 
 	if (glfwWindowShouldClose(plot->window)) {
 		glfwTerminate();
-		glDeleteProgram(plot->shaderProgram);
-		glDeleteVertexArrays(1, &plot->vertArrayObj);
-		glDeleteBuffers(1, &plot->vertBufferObj);
 		return 0;
 	} else {
+		float *vertices = malloc(3 * numVerts * sizeof(float));
+		xy2vert(plot, x, y, vertices, numVerts, type);
+		glBufferData(GL_ARRAY_BUFFER, 3 * numVerts * sizeof(float), vertices, GL_STREAM_DRAW);
+		free(vertices);		
+
 		glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT);
-		
-		glBufferData(GL_ARRAY_BUFFER, 3 * numVerts * sizeof(float), vertices, GL_STREAM_DRAW);
 
 		glUseProgram(plot->shaderProgram);
 		glBindVertexArray(plot->vertArrayObj);
@@ -117,15 +127,23 @@ int qdspUpdate(QDSPplot *plot, float *vertices, int numVerts) {
 
 		glfwSwapBuffers(plot->window);
 		glfwPollEvents();
+
 		return 1;
 	}
 }
 
-void resizeCallback(GLFWwindow *window, int width, int height) {
+void qdspDelete(QDSPplot *plot) {
+		glDeleteProgram(plot->shaderProgram);
+		glDeleteVertexArrays(1, &plot->vertArrayObj);
+		glDeleteBuffers(1, &plot->vertBufferObj);
+		free(plot);
+}
+
+static void resizeCallback(GLFWwindow *window, int width, int height) {
 	glViewport(0, 0, width, height);
 }
 
-int makeShader(char *buf, int size, GLenum type) {
+static int makeShader(char *buf, int size, GLenum type) {
 	int shader = glCreateShader(type);
 	glShaderSource(shader, 1, (const GLchar**)&buf, &size);
 	glCompileShader(shader);
@@ -148,4 +166,31 @@ int makeShader(char *buf, int size, GLenum type) {
 	}
 
 	return shader;
+}
+
+static void xy2vert(QDSPplot *plot, void *x, void *y, float *vertices,
+                    int numVerts, QDSPtype type) {	
+#pragma omp parallel for
+	for (int i = 0; i < numVerts; i++) {
+		double xval, yval;
+		switch (type) {
+		case QDSP_INT:
+			xval = ((int*)x)[i];
+			yval = ((int*)y)[i];
+			break;
+		case QDSP_FLOAT:
+			xval = ((float*)x)[i];
+			yval = ((float*)y)[i];
+			break;
+		case QDSP_DOUBLE:
+		default:
+			xval = ((double*)x)[i];
+			yval = ((double*)y)[i];
+			break;
+		}
+			
+		vertices[3*i + 0] = (float)(2 * (xval - plot->xMin) / (plot->xMax - plot->xMin) - 1);
+		vertices[3*i + 1] = (float)(2 * (yval - plot->yMin) / (plot->yMax - plot->yMin) - 1);
+		vertices[3*i + 2] = 0.0f;
+	}
 }
