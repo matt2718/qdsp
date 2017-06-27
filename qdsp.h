@@ -13,7 +13,11 @@ typedef struct QDSPplot {
 	double xMin, xMax;
 	double yMin, yMax;
 
+	float redFG, greenFG, blueFG;
+	float redBG, greenBG, blueBG;
+
 	struct timespec lastTime;
+
 } QDSPplot;
 
 typedef enum QDSPtype {
@@ -25,6 +29,10 @@ typedef enum QDSPtype {
 QDSPplot *qdspInit(const char *title);
 
 void qdspSetBounds(QDSPplot *plot, double xMin, double xMax, double yMin, double yMax);
+
+void qdspSetPointColor(QDSPplot *plot, float red, float green, float blue);
+
+void qdspSetBGColor(QDSPplot *plot, float red, float green, float blue);
 
 int qdspUpdate(QDSPplot *plot, void *x, void *y, int numVerts, QDSPtype type);
 

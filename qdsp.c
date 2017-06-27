@@ -19,12 +19,6 @@ static void xy2vert(QDSPplot *plot, void *x, void *y, float *vertices,
 QDSPplot *qdspInit(const char *title) {
 	QDSPplot *plot = malloc(sizeof(QDSPplot));
 
-	// set bounds
-	plot->xMin = -1.0;
-	plot->xMax = 1.0;
-	plot->yMin = -1.0;
-	plot->yMax = 1.0;
-
 	// create context
 	glfwInit();
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
@@ -92,6 +86,14 @@ QDSPplot *qdspInit(const char *title) {
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
 	glEnableVertexAttribArray(0);
 
+	// default bounds
+	qdspSetBounds(plot, -1.0f, 1.0f, -1.0f, 1.0f);
+
+	// default colors: yellow points, black background
+	qdspSetPointColor(plot, 1.0f, 1.0f, 0.2f);
+	qdspSetBGColor(plot, 0.0f, 0.0f, 0.0f);
+
+	// framerate stuff
 	clock_gettime(CLOCK_MONOTONIC, &plot->lastTime);
 
 	return plot;
@@ -102,6 +104,18 @@ void qdspSetBounds(QDSPplot *plot, double xMin, double xMax, double yMin, double
 	plot->xMax = xMax;
 	plot->yMin = yMin;
 	plot->yMax = yMax;
+}
+
+void qdspSetPointColor(QDSPplot *plot, float red, float green, float blue) {
+	int location = glGetUniformLocation(plot->shaderProgram, "pointColor");
+	glUseProgram(plot->shaderProgram);
+	glUniform4f(location, red, green, blue, 1.0f);
+}
+
+void qdspSetBGColor(QDSPplot *plot, float red, float green, float blue) {
+	plot->redBG = red;
+	plot->greenBG = green;
+	plot->blueBG = blue;	
 }
 
 int qdspUpdate(QDSPplot *plot, void *x, void *y, int numVerts, QDSPtype type) {
@@ -125,7 +139,7 @@ int qdspUpdate(QDSPplot *plot, void *x, void *y, int numVerts, QDSPtype type) {
 		glBufferData(GL_ARRAY_BUFFER, 3 * numVerts * sizeof(float), vertices, GL_STREAM_DRAW);
 		free(vertices);		
 
-		glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+		glClearColor(plot->redBG, plot->greenBG, plot->blueBG, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT);
 
 		glUseProgram(plot->shaderProgram);
