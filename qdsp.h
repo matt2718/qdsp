@@ -8,7 +8,8 @@ typedef struct QDSPplot {
 
 	int shaderProgram;
 	unsigned int vertArrayObj;
-	unsigned int vertBufferObj;
+	unsigned int vertBufferObjX;
+	unsigned int vertBufferObjY;
 
 	double xMin, xMax;
 	double yMin, yMax;

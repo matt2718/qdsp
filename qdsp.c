@@ -77,14 +77,18 @@ QDSPplot *qdspInit(const char *title) {
 
 	// buffer/array setup
 	glGenVertexArrays(1, &plot->vertArrayObj);
-	glGenBuffers(1, &plot->vertBufferObj);
+	glGenBuffers(1, &plot->vertBufferObjX);
+	glGenBuffers(1, &plot->vertBufferObjY);
 
 	glBindVertexArray(plot->vertArrayObj);
-	glBindBuffer(GL_ARRAY_BUFFER, plot->vertBufferObj);
-	//glBufferData(GL_ARRAY_BUFFER, 3 * numVerts * sizeof(float), vertices, GL_STREAM_DRAW);
 
+	glBindBuffer(GL_ARRAY_BUFFER, plot->vertBufferObjX);
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
 	glEnableVertexAttribArray(0);
+
+	glBindBuffer(GL_ARRAY_BUFFER, plot->vertBufferObjY);
+	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+	glEnableVertexAttribArray(1);
 
 	// default bounds
 	qdspSetBounds(plot, -1.0f, 1.0f, -1.0f, 1.0f);
@@ -136,8 +140,14 @@ int qdspUpdate(QDSPplot *plot, void *x, void *y, int numVerts, QDSPtype type) {
 	} else {
 		float *vertices = malloc(3 * numVerts * sizeof(float));
 		xy2vert(plot, x, y, vertices, numVerts, type);
+
+		glBindBuffer(GL_ARRAY_BUFFER, plot->vertBufferObjX);
 		glBufferData(GL_ARRAY_BUFFER, 3 * numVerts * sizeof(float), vertices, GL_STREAM_DRAW);
-		free(vertices);		
+
+		glBindBuffer(GL_ARRAY_BUFFER, plot->vertBufferObjY);
+		glBufferData(GL_ARRAY_BUFFER, 3 * numVerts * sizeof(float), vertices, GL_STREAM_DRAW);
+
+		free(vertices);
 
 		glClearColor(plot->redBG, plot->greenBG, plot->blueBG, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT);
@@ -156,7 +166,8 @@ int qdspUpdate(QDSPplot *plot, void *x, void *y, int numVerts, QDSPtype type) {
 void qdspDelete(QDSPplot *plot) {
 		glDeleteProgram(plot->shaderProgram);
 		glDeleteVertexArrays(1, &plot->vertArrayObj);
-		glDeleteBuffers(1, &plot->vertBufferObj);
+		glDeleteBuffers(1, &plot->vertBufferObjX);
+		glDeleteBuffers(1, &plot->vertBufferObjY);
 		free(plot);
 }
 
