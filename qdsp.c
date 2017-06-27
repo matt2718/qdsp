@@ -18,6 +18,13 @@ static void xy2vert(QDSPplot *plot, void *x, void *y, float *vertices,
 
 QDSPplot *qdspInit(const char *title) {
 	QDSPplot *plot = malloc(sizeof(QDSPplot));
+
+	// set bounds
+	plot->xMin = -1.0;
+	plot->xMax = 1.0;
+	plot->yMin = -1.0;
+	plot->yMax = 1.0;
+
 	// create context
 	glfwInit();
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
