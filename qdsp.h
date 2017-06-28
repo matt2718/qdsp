@@ -14,9 +14,6 @@ typedef struct QDSPplot {
 	double xMin, xMax;
 	double yMin, yMax;
 
-	float redFG, greenFG, blueFG;
-	float redBG, greenBG, blueBG;
-
 	struct timespec lastTime;
 
 } QDSPplot;
@@ -25,9 +22,9 @@ QDSPplot *qdspInit(const char *title);
 
 void qdspSetBounds(QDSPplot *plot, double xMin, double xMax, double yMin, double yMax);
 
-void qdspSetPointColor(QDSPplot *plot, float red, float green, float blue);
+void qdspSetPointColor(QDSPplot *plot, int rgb);
 
-void qdspSetBGColor(QDSPplot *plot, float red, float green, float blue);
+void qdspSetBGColor(QDSPplot *plot, int rgb);
 
 int qdspUpdate(QDSPplot *plot, double *x, double *y, int numVerts);
 

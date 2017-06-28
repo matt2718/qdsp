@@ -91,8 +91,8 @@ QDSPplot *qdspInit(const char *title) {
 	qdspSetBounds(plot, -1.0f, 1.0f, -1.0f, 1.0f);
 
 	// default colors: yellow points, black background
-	qdspSetPointColor(plot, 1.0f, 1.0f, 0.2f);
-	qdspSetBGColor(plot, 0.0f, 0.0f, 0.0f);
+	qdspSetPointColor(plot, 0xffff33);
+	qdspSetBGColor(plot, 0x000000);
 
 	// framerate stuff
 	clock_gettime(CLOCK_MONOTONIC, &plot->lastTime);
@@ -108,19 +108,21 @@ void qdspSetBounds(QDSPplot *plot, double xMin, double xMax, double yMin, double
 	glUniform1f(glGetUniformLocation(plot->shaderProgram, "yMax"), yMax);
 }
 
-void qdspSetPointColor(QDSPplot *plot, float red, float green, float blue) {
+void qdspSetPointColor(QDSPplot *plot, int rgb) {
 	glUseProgram(plot->shaderProgram);
 	glUniform4f(glGetUniformLocation(plot->shaderProgram, "pointColor"),
-	            red, green, blue, 1.0f);
+	            (0xff & rgb << 16) / 255.0,
+	            (0xff & rgb << 8) / 255.0,
+	            (0xff & rgb) / 255.0, 1.0f);
 }
 
-void qdspSetBGColor(QDSPplot *plot, float red, float green, float blue) {
-	plot->redBG = red;
-	plot->greenBG = green;
-	plot->blueBG = blue;	
+void qdspSetBGColor(QDSPplot *plot, int rgb) {
+	glClearColor((0xff & rgb << 16) / 255.0,
+	             (0xff & rgb << 8) / 255.0,
+	             (0xff & rgb) / 255.0);
 }
 
-int qdspUpdate(QDSPplot *plot, double *x, double *y, int numVerts) {
+int qdspUpdate(QDSPplot *plot, double *x, double *y, int *colors, int numVerts) {
 	struct timespec lastTime = plot->lastTime;
 	struct timespec newTime;
 	clock_gettime(CLOCK_MONOTONIC, &newTime);
@@ -142,7 +144,6 @@ int qdspUpdate(QDSPplot *plot, double *x, double *y, int numVerts) {
 		glBindBuffer(GL_ARRAY_BUFFER, plot->vertBufferObjY);
 		glBufferData(GL_ARRAY_BUFFER, numVerts * sizeof(double), y, GL_STREAM_DRAW);
 
-		glClearColor(plot->redBG, plot->greenBG, plot->blueBG, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT);
 
 		glUseProgram(plot->shaderProgram);
