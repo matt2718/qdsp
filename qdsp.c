@@ -111,18 +111,19 @@ void qdspSetBounds(QDSPplot *plot, double xMin, double xMax, double yMin, double
 void qdspSetPointColor(QDSPplot *plot, int rgb) {
 	glUseProgram(plot->shaderProgram);
 	glUniform4f(glGetUniformLocation(plot->shaderProgram, "pointColor"),
-	            (0xff & rgb << 16) / 255.0,
-	            (0xff & rgb << 8) / 255.0,
+	            (0xff & rgb >> 16) / 255.0,
+	            (0xff & rgb >> 8) / 255.0,
 	            (0xff & rgb) / 255.0, 1.0f);
 }
 
 void qdspSetBGColor(QDSPplot *plot, int rgb) {
-	glClearColor((0xff & rgb << 16) / 255.0,
-	             (0xff & rgb << 8) / 255.0,
-	             (0xff & rgb) / 255.0);
+	glClearColor((0xff & rgb >> 16) / 255.0,
+	             (0xff & rgb >> 8) / 255.0,
+	             (0xff & rgb) / 255.0,
+	             1.0f);
 }
 
-int qdspUpdate(QDSPplot *plot, double *x, double *y, int *colors, int numVerts) {
+int qdspUpdate(QDSPplot *plot, double *x, double *y, int numVerts) {
 	struct timespec lastTime = plot->lastTime;
 	struct timespec newTime;
 	clock_gettime(CLOCK_MONOTONIC, &newTime);
