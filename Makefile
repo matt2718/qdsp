@@ -1,5 +1,5 @@
 CC=gcc
-CFLAGS=-std=gnu99 -fPIC -fopenmp
+CFLAGS=-std=gnu99 -fPIC
 LDFLAGS=-shared
 LDLIBS=-lglfw
 
@@ -24,7 +24,7 @@ clean:
 install: libqdsp.so qdsp.h
 	cp libqdsp.so $(INSTPREFIX)/lib/
 	cp qdsp.h $(INSTPREFIX)/include/
-	@echo "\nInstalled successfully. You may need to run ldconfig."
+	@echo "Installed successfully. You may need to run ldconfig."
 
 libqdsp.so: $(OBJECTS)
 	$(CC) -o libqdsp.so $(CFLAGS) $(LDFLAGS) $(OBJECTS) $(LDLIBS)
@@ -38,3 +38,7 @@ shaders.h: $(SHADERS)
 
 qdsp.o: qdsp.h glad/glad.h shaders.h
 glad/glad.o: glad/glad.h glad/KHR/khrplatform.h
+
+
+example: example.c
+	$(CC) -o example -std=gnu99 -fopenmp example.c -lm -lfftw3 -lqdsp
