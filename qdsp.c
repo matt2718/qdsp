@@ -13,9 +13,6 @@ static int makeShader(char *buf, int size, GLenum type);
 
 static void resizeCallback(GLFWwindow *window, int width, int height);
 
-static void xy2vert(QDSPplot *plot, void *x, void *y, float *vertices,
-                    int numVerts, QDSPtype type);
-
 QDSPplot *qdspInit(const char *title) {
 	QDSPplot *plot = malloc(sizeof(QDSPplot));
 
@@ -83,11 +80,11 @@ QDSPplot *qdspInit(const char *title) {
 	glBindVertexArray(plot->vertArrayObj);
 
 	glBindBuffer(GL_ARRAY_BUFFER, plot->vertBufferObjX);
-	glVertexAttribPointer(0, 1, GL_FLOAT, GL_FALSE, 0, NULL);
+	glVertexAttribPointer(0, 1, GL_DOUBLE, GL_FALSE, 0, NULL);
 	glEnableVertexAttribArray(0);
 
 	glBindBuffer(GL_ARRAY_BUFFER, plot->vertBufferObjY);
-	glVertexAttribPointer(1, 1, GL_FLOAT, GL_FALSE, 0, NULL);
+	glVertexAttribPointer(1, 1, GL_DOUBLE, GL_FALSE, 0, NULL);
 	glEnableVertexAttribArray(1);
 
 	// default bounds
@@ -123,7 +120,7 @@ void qdspSetBGColor(QDSPplot *plot, float red, float green, float blue) {
 	plot->blueBG = blue;	
 }
 
-int qdspUpdate(QDSPplot *plot, void *x, void *y, int numVerts, QDSPtype type) {
+int qdspUpdate(QDSPplot *plot, double *x, double *y, int numVerts) {
 	struct timespec lastTime = plot->lastTime;
 	struct timespec newTime;
 	clock_gettime(CLOCK_MONOTONIC, &newTime);
@@ -139,16 +136,11 @@ int qdspUpdate(QDSPplot *plot, void *x, void *y, int numVerts, QDSPtype type) {
 		glfwTerminate();
 		return 0;
 	} else {
-		float *vertices = malloc(3 * numVerts * sizeof(float));
-		xy2vert(plot, x, y, vertices, numVerts, type);
-
 		glBindBuffer(GL_ARRAY_BUFFER, plot->vertBufferObjX);
-		glBufferData(GL_ARRAY_BUFFER, numVerts * sizeof(float), vertices, GL_STREAM_DRAW);
+		glBufferData(GL_ARRAY_BUFFER, numVerts * sizeof(double), x, GL_STREAM_DRAW);
 
 		glBindBuffer(GL_ARRAY_BUFFER, plot->vertBufferObjY);
-		glBufferData(GL_ARRAY_BUFFER, numVerts * sizeof(float), vertices + numVerts, GL_STREAM_DRAW);
-
-		free(vertices);
+		glBufferData(GL_ARRAY_BUFFER, numVerts * sizeof(double), y, GL_STREAM_DRAW);
 
 		glClearColor(plot->redBG, plot->greenBG, plot->blueBG, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT);
@@ -199,31 +191,4 @@ static int makeShader(char *buf, int size, GLenum type) {
 	}
 
 	return shader;
-}
-
-static void xy2vert(QDSPplot *plot, void *x, void *y, float *vertices,
-                    int numVerts, QDSPtype type) {	
-#pragma omp parallel for
-	for (int i = 0; i < numVerts; i++) {
-		double xval, yval;
-		switch (type) {
-		case QDSP_INT:
-			xval = ((int*)x)[i];
-			yval = ((int*)y)[i];
-			break;
-		case QDSP_FLOAT:
-			xval = ((float*)x)[i];
-			yval = ((float*)y)[i];
-			break;
-		case QDSP_DOUBLE:
-		default:
-			xval = ((double*)x)[i];
-			yval = ((double*)y)[i];
-			break;
-		}
-			
-		vertices[i] = (float)xval;
-		vertices[numVerts + i] = (float)yval;
-		vertices[2*numVerts + i] = 0.0f;
-	}
 }
