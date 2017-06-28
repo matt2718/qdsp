@@ -13,9 +13,6 @@ static int makeShader(char *buf, int size, GLenum type);
 
 static void resizeCallback(GLFWwindow *window, int width, int height);
 
-static void xy2vert(QDSPplot *plot, void *x, void *y, float *vertices,
-                    int numVerts, QDSPtype type);
-
 QDSPplot *qdspInit(const char *title) {
 	QDSPplot *plot = malloc(sizeof(QDSPplot));
 
@@ -77,14 +74,18 @@ QDSPplot *qdspInit(const char *title) {
 
 	// buffer/array setup
 	glGenVertexArrays(1, &plot->vertArrayObj);
-	glGenBuffers(1, &plot->vertBufferObj);
+	glGenBuffers(1, &plot->vertBufferObjX);
+	glGenBuffers(1, &plot->vertBufferObjY);
 
 	glBindVertexArray(plot->vertArrayObj);
-	glBindBuffer(GL_ARRAY_BUFFER, plot->vertBufferObj);
-	//glBufferData(GL_ARRAY_BUFFER, 3 * numVerts * sizeof(float), vertices, GL_STREAM_DRAW);
 
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+	glBindBuffer(GL_ARRAY_BUFFER, plot->vertBufferObjX);
+	glVertexAttribPointer(0, 1, GL_DOUBLE, GL_FALSE, 0, NULL);
 	glEnableVertexAttribArray(0);
+
+	glBindBuffer(GL_ARRAY_BUFFER, plot->vertBufferObjY);
+	glVertexAttribPointer(1, 1, GL_DOUBLE, GL_FALSE, 0, NULL);
+	glEnableVertexAttribArray(1);
 
 	// default bounds
 	qdspSetBounds(plot, -1.0f, 1.0f, -1.0f, 1.0f);
@@ -100,16 +101,17 @@ QDSPplot *qdspInit(const char *title) {
 }
 
 void qdspSetBounds(QDSPplot *plot, double xMin, double xMax, double yMin, double yMax) {
-	plot->xMin = xMin;
-	plot->xMax = xMax;
-	plot->yMin = yMin;
-	plot->yMax = yMax;
+	glUseProgram(plot->shaderProgram);
+	glUniform1f(glGetUniformLocation(plot->shaderProgram, "xMin"), xMin);
+	glUniform1f(glGetUniformLocation(plot->shaderProgram, "xMax"), xMax);
+	glUniform1f(glGetUniformLocation(plot->shaderProgram, "yMin"), yMin);
+	glUniform1f(glGetUniformLocation(plot->shaderProgram, "yMax"), yMax);
 }
 
 void qdspSetPointColor(QDSPplot *plot, float red, float green, float blue) {
-	int location = glGetUniformLocation(plot->shaderProgram, "pointColor");
 	glUseProgram(plot->shaderProgram);
-	glUniform4f(location, red, green, blue, 1.0f);
+	glUniform4f(glGetUniformLocation(plot->shaderProgram, "pointColor"),
+	            red, green, blue, 1.0f);
 }
 
 void qdspSetBGColor(QDSPplot *plot, float red, float green, float blue) {
@@ -118,7 +120,7 @@ void qdspSetBGColor(QDSPplot *plot, float red, float green, float blue) {
 	plot->blueBG = blue;	
 }
 
-int qdspUpdate(QDSPplot *plot, void *x, void *y, int numVerts, QDSPtype type) {
+int qdspUpdate(QDSPplot *plot, double *x, double *y, int numVerts) {
 	struct timespec lastTime = plot->lastTime;
 	struct timespec newTime;
 	clock_gettime(CLOCK_MONOTONIC, &newTime);
@@ -134,10 +136,11 @@ int qdspUpdate(QDSPplot *plot, void *x, void *y, int numVerts, QDSPtype type) {
 		glfwTerminate();
 		return 0;
 	} else {
-		float *vertices = malloc(3 * numVerts * sizeof(float));
-		xy2vert(plot, x, y, vertices, numVerts, type);
-		glBufferData(GL_ARRAY_BUFFER, 3 * numVerts * sizeof(float), vertices, GL_STREAM_DRAW);
-		free(vertices);		
+		glBindBuffer(GL_ARRAY_BUFFER, plot->vertBufferObjX);
+		glBufferData(GL_ARRAY_BUFFER, numVerts * sizeof(double), x, GL_STREAM_DRAW);
+
+		glBindBuffer(GL_ARRAY_BUFFER, plot->vertBufferObjY);
+		glBufferData(GL_ARRAY_BUFFER, numVerts * sizeof(double), y, GL_STREAM_DRAW);
 
 		glClearColor(plot->redBG, plot->greenBG, plot->blueBG, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT);
@@ -156,7 +159,8 @@ int qdspUpdate(QDSPplot *plot, void *x, void *y, int numVerts, QDSPtype type) {
 void qdspDelete(QDSPplot *plot) {
 		glDeleteProgram(plot->shaderProgram);
 		glDeleteVertexArrays(1, &plot->vertArrayObj);
-		glDeleteBuffers(1, &plot->vertBufferObj);
+		glDeleteBuffers(1, &plot->vertBufferObjX);
+		glDeleteBuffers(1, &plot->vertBufferObjY);
 		free(plot);
 }
 
@@ -187,31 +191,4 @@ static int makeShader(char *buf, int size, GLenum type) {
 	}
 
 	return shader;
-}
-
-static void xy2vert(QDSPplot *plot, void *x, void *y, float *vertices,
-                    int numVerts, QDSPtype type) {	
-#pragma omp parallel for
-	for (int i = 0; i < numVerts; i++) {
-		double xval, yval;
-		switch (type) {
-		case QDSP_INT:
-			xval = ((int*)x)[i];
-			yval = ((int*)y)[i];
-			break;
-		case QDSP_FLOAT:
-			xval = ((float*)x)[i];
-			yval = ((float*)y)[i];
-			break;
-		case QDSP_DOUBLE:
-		default:
-			xval = ((double*)x)[i];
-			yval = ((double*)y)[i];
-			break;
-		}
-			
-		vertices[3*i + 0] = (float)(2 * (xval - plot->xMin) / (plot->xMax - plot->xMin) - 1);
-		vertices[3*i + 1] = (float)(2 * (yval - plot->yMin) / (plot->yMax - plot->yMin) - 1);
-		vertices[3*i + 2] = 0.0f;
-	}
 }

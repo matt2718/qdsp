@@ -8,7 +8,8 @@ typedef struct QDSPplot {
 
 	int shaderProgram;
 	unsigned int vertArrayObj;
-	unsigned int vertBufferObj;
+	unsigned int vertBufferObjX;
+	unsigned int vertBufferObjY;
 
 	double xMin, xMax;
 	double yMin, yMax;
@@ -20,12 +21,6 @@ typedef struct QDSPplot {
 
 } QDSPplot;
 
-typedef enum QDSPtype {
-	QDSP_INT,
-	QDSP_FLOAT,
-	QDSP_DOUBLE
-} QDSPtype; 
-
 QDSPplot *qdspInit(const char *title);
 
 void qdspSetBounds(QDSPplot *plot, double xMin, double xMax, double yMin, double yMax);
@@ -34,7 +29,7 @@ void qdspSetPointColor(QDSPplot *plot, float red, float green, float blue);
 
 void qdspSetBGColor(QDSPplot *plot, float red, float green, float blue);
 
-int qdspUpdate(QDSPplot *plot, void *x, void *y, int numVerts, QDSPtype type);
+int qdspUpdate(QDSPplot *plot, double *x, double *y, int numVerts);
 
 void qdspDelete(QDSPplot *plot);
 
