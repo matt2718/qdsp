@@ -1,5 +1,5 @@
 CC=gcc
-CFLAGS=-std=gnu99 -fPIC
+CFLAGS=-std=gnu99 -fPIC -fopenmp
 LDFLAGS=-shared
 LDLIBS=-lglfw
 
