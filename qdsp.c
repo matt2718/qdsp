@@ -76,6 +76,7 @@ QDSPplot *qdspInit(const char *title) {
 	glGenVertexArrays(1, &plot->vertArrayObj);
 	glGenBuffers(1, &plot->vertBufferObjX);
 	glGenBuffers(1, &plot->vertBufferObjY);
+	glGenBuffers(1, &plot->vertBufferObjCol);
 
 	glBindVertexArray(plot->vertArrayObj);
 
@@ -87,12 +88,16 @@ QDSPplot *qdspInit(const char *title) {
 	glVertexAttribPointer(1, 1, GL_DOUBLE, GL_FALSE, 0, NULL);
 	glEnableVertexAttribArray(1);
 
+	glBindBuffer(GL_ARRAY_BUFFER, plot->vertBufferObjCol);
+	glVertexAttribPointer(2, 1, GL_INT, GL_FALSE, 0, NULL);
+	glEnableVertexAttribArray(2);
+
 	// default bounds
 	qdspSetBounds(plot, -1.0f, 1.0f, -1.0f, 1.0f);
 
 	// default colors: yellow points, black background
-	qdspSetPointColor(plot, 1.0f, 1.0f, 0.2f);
-	qdspSetBGColor(plot, 0.0f, 0.0f, 0.0f);
+	qdspSetPointColor(plot, 0xffff33);
+	qdspSetBGColor(plot, 0x000000);
 
 	// framerate stuff
 	clock_gettime(CLOCK_MONOTONIC, &plot->lastTime);
@@ -108,19 +113,19 @@ void qdspSetBounds(QDSPplot *plot, double xMin, double xMax, double yMin, double
 	glUniform1f(glGetUniformLocation(plot->shaderProgram, "yMax"), yMax);
 }
 
-void qdspSetPointColor(QDSPplot *plot, float red, float green, float blue) {
+void qdspSetPointColor(QDSPplot *plot, int rgb) {
 	glUseProgram(plot->shaderProgram);
-	glUniform4f(glGetUniformLocation(plot->shaderProgram, "pointColor"),
-	            red, green, blue, 1.0f);
+	glUniform1i(glGetUniformLocation(plot->shaderProgram, "defaultColor"), rgb);
 }
 
-void qdspSetBGColor(QDSPplot *plot, float red, float green, float blue) {
-	plot->redBG = red;
-	plot->greenBG = green;
-	plot->blueBG = blue;	
+void qdspSetBGColor(QDSPplot *plot, int rgb) {
+	glClearColor((0xff & rgb >> 16) / 255.0,
+	             (0xff & rgb >> 8) / 255.0,
+	             (0xff & rgb) / 255.0,
+	             1.0f);
 }
 
-int qdspUpdate(QDSPplot *plot, double *x, double *y, int numVerts) {
+int qdspUpdate(QDSPplot *plot, double *x, double *y, int *color, int numVerts) {
 	struct timespec lastTime = plot->lastTime;
 	struct timespec newTime;
 	clock_gettime(CLOCK_MONOTONIC, &newTime);
@@ -131,21 +136,27 @@ int qdspUpdate(QDSPplot *plot, double *x, double *y, int numVerts) {
 		plot->lastTime = newTime;
 	else
 		return 2;
-
+	
 	if (glfwWindowShouldClose(plot->window)) {
 		glfwTerminate();
 		return 0;
 	} else {
+		glUseProgram(plot->shaderProgram);
+		
 		glBindBuffer(GL_ARRAY_BUFFER, plot->vertBufferObjX);
 		glBufferData(GL_ARRAY_BUFFER, numVerts * sizeof(double), x, GL_STREAM_DRAW);
 
 		glBindBuffer(GL_ARRAY_BUFFER, plot->vertBufferObjY);
 		glBufferData(GL_ARRAY_BUFFER, numVerts * sizeof(double), y, GL_STREAM_DRAW);
-
-		glClearColor(plot->redBG, plot->greenBG, plot->blueBG, 1.0f);
+		
+		if (color != NULL) {
+			glBindBuffer(GL_ARRAY_BUFFER, plot->vertBufferObjCol);
+			glBufferData(GL_ARRAY_BUFFER, numVerts * sizeof(int), color, GL_STREAM_DRAW);
+		}
+		glUniform1i(glGetUniformLocation(plot->shaderProgram, "useCustom"),
+		            color != NULL);
+		
 		glClear(GL_COLOR_BUFFER_BIT);
-
-		glUseProgram(plot->shaderProgram);
 		glBindVertexArray(plot->vertArrayObj);
 		glDrawArrays(GL_POINTS, 0, numVerts);
 
@@ -157,11 +168,12 @@ int qdspUpdate(QDSPplot *plot, double *x, double *y, int numVerts) {
 }
 
 void qdspDelete(QDSPplot *plot) {
-		glDeleteProgram(plot->shaderProgram);
-		glDeleteVertexArrays(1, &plot->vertArrayObj);
-		glDeleteBuffers(1, &plot->vertBufferObjX);
-		glDeleteBuffers(1, &plot->vertBufferObjY);
-		free(plot);
+	glDeleteProgram(plot->shaderProgram);
+	glDeleteVertexArrays(1, &plot->vertArrayObj);
+	glDeleteBuffers(1, &plot->vertBufferObjX);
+	glDeleteBuffers(1, &plot->vertBufferObjY);
+	glDeleteBuffers(1, &plot->vertBufferObjCol);
+	free(plot);
 }
 
 static void resizeCallback(GLFWwindow *window, int width, int height) {

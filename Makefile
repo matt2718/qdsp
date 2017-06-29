@@ -1,7 +1,8 @@
 CC=gcc
-CFLAGS=-std=gnu99 -fPIC -fopenmp
+CFLAGS=-std=gnu99 -fPIC
 LDFLAGS=-shared
 LDLIBS=-lglfw
+EXAMPLE_CFLAGS=-std=gnu99 -fopenmp
 
 SOURCES=qdsp.c glad/glad.c
 SHADERS=vertex.glsl fragment.glsl
@@ -15,6 +16,7 @@ all: libqdsp.so
 .PHONY: debug
 debug: libqdsp.so
 debug: CFLAGS += -g -O0
+debug: EXAMPLE_CFLAGS += -g -O0
 
 .PHONY: clean
 clean:
@@ -24,7 +26,7 @@ clean:
 install: libqdsp.so qdsp.h
 	cp libqdsp.so $(INSTPREFIX)/lib/
 	cp qdsp.h $(INSTPREFIX)/include/
-	@echo "\nInstalled successfully. You may need to run ldconfig."
+	@echo "Installed successfully. You may need to run ldconfig."
 
 libqdsp.so: $(OBJECTS)
 	$(CC) -o libqdsp.so $(CFLAGS) $(LDFLAGS) $(OBJECTS) $(LDLIBS)
@@ -38,3 +40,7 @@ shaders.h: $(SHADERS)
 
 qdsp.o: qdsp.h glad/glad.h shaders.h
 glad/glad.o: glad/glad.h glad/KHR/khrplatform.h
+
+
+example: example.c
+	$(CC) -o example $(EXAMPLE_CFLAGS) example.c -lm -lfftw3 -lqdsp
