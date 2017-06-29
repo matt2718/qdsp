@@ -10,6 +10,7 @@ typedef struct QDSPplot {
 	unsigned int vertArrayObj;
 	unsigned int vertBufferObjX;
 	unsigned int vertBufferObjY;
+	unsigned int vertBufferObjCol;
 
 	double xMin, xMax;
 	double yMin, yMax;
@@ -26,7 +27,7 @@ void qdspSetPointColor(QDSPplot *plot, int rgb);
 
 void qdspSetBGColor(QDSPplot *plot, int rgb);
 
-int qdspUpdate(QDSPplot *plot, double *x, double *y, int numVerts);
+int qdspUpdate(QDSPplot *plot, double *x, double *y, int *color, int numVerts);
 
 void qdspDelete(QDSPplot *plot);
 

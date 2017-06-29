@@ -27,7 +27,7 @@ fftw_plan eIFFT;
 double *rhoxBuf, *exBuf;
 fftw_complex *rhokBuf, *ekBuf;
 
-void init(double *x, double *v);
+void init(double *x, double *v, int *color);
 
 void deposit(double *x, double *rho);
 void poisson(double *rho, double *e);
@@ -39,6 +39,7 @@ int main(int argc, char **argv) {
 	// allocate memory
 	double *x = malloc(PART_NUM * sizeof(double));
 	double *v = malloc(PART_NUM * sizeof(double));
+	int *color = malloc(PART_NUM * sizeof(int));
 
 	double *rho = malloc(NGRID * sizeof(double));
 	double *eField = malloc(NGRID * sizeof(double));
@@ -53,7 +54,7 @@ int main(int argc, char **argv) {
 	eIFFT =  fftw_plan_dft_c2r_1d(NGRID, ekBuf, exBuf, FFTW_MEASURE);
 
 	// initialize particles
-	init(x, v);
+	init(x, v, color);
 
 	////////////////////////////////////////////////////////////
 	// This is the first section relevant to QDSP
@@ -64,7 +65,8 @@ int main(int argc, char **argv) {
 	// set x and y bounds. parameters are xmin, xmax, ymin, ymax
 	qdspSetBounds(plot, 0, XMAX, -30, 30);
 
-	// point color and background color. pretty self-explanatory
+	// default point color and background color. pretty self-explanatory
+	// the first one won't be used if we specify a color array when updating
 	qdspSetPointColor(plot, 0xffff33);
 	qdspSetBGColor(plot, 0x000000);
 
@@ -84,10 +86,18 @@ int main(int argc, char **argv) {
 
 		////////////////////////////////////////////////////////////
 		// this function copies coords to the GPU and updates the plot
-		// parameters 2 and 3 are arrays of x and y coords, both of type double
-		// last parameter specifies the number of points to plot
+		//
+		// parameters 2 and 3: arrays of x and y coords, both of type double
+		//
+		// parameter 4: array of point colors (as RGB ints),
+		//     leave this NULL to use the default
+		//
+		// parameter 5: specifies the number of points to plot
+		//
 		// returns zero iff the window has closed
-		open = qdspUpdate(plot, x, v, PART_NUM);
+		
+		open = qdspUpdate(plot, x, v, color, PART_NUM);
+
 		////////////////////////////////////////////////////////////
 		
 		vHalfPush(x, v, eField, 1);
@@ -98,6 +108,7 @@ int main(int argc, char **argv) {
 	// cleanup
 	free(x);
 	free(v);
+	free(color);
 	free(rho);
 	free(eField);
 
@@ -116,10 +127,17 @@ int main(int argc, char **argv) {
 	return 0;
 }
 
-void init(double *x, double *v) {
+void init(double *x, double *v, int *color) {
 	for (int i = 0; i < PART_NUM; i++) {
 		x[i] = i * XMAX / PART_NUM;
-		v[i] = (rand() % 2) ? 8.0 : -8.0;
+
+		if (i % 2) {
+			v[i] = 8.0;
+			color[i] = 0xffff00;
+		} else {
+			v[i] = -8.0;
+			color[i] = 0xff3333;
+		}
 	}
 }
 

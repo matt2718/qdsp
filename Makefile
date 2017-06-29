@@ -2,6 +2,7 @@ CC=gcc
 CFLAGS=-std=gnu99 -fPIC
 LDFLAGS=-shared
 LDLIBS=-lglfw
+EXAMPLE_CFLAGS=-std=gnu99 -fopenmp
 
 SOURCES=qdsp.c glad/glad.c
 SHADERS=vertex.glsl fragment.glsl
@@ -15,6 +16,7 @@ all: libqdsp.so
 .PHONY: debug
 debug: libqdsp.so
 debug: CFLAGS += -g -O0
+debug: EXAMPLE_CFLAGS += -g -O0
 
 .PHONY: clean
 clean:
@@ -41,4 +43,4 @@ glad/glad.o: glad/glad.h glad/KHR/khrplatform.h
 
 
 example: example.c
-	$(CC) -o example -std=gnu99 -fopenmp example.c -lm -lfftw3 -lqdsp
+	$(CC) -o example $(EXAMPLE_CFLAGS) example.c -lm -lfftw3 -lqdsp
