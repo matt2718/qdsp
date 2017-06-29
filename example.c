@@ -67,8 +67,8 @@ int main(int argc, char **argv) {
 
 	// default point color and background color. pretty self-explanatory
 	// the first one won't be used if we specify a color array when updating
-	qdspSetPointColor(plot, 0xffff33);
-	qdspSetBGColor(plot, 0x000000);
+	qdspSetPointColor(plot, 0x000000);
+	qdspSetBGColor(plot, 0xffffff);
 
 	// see below for update and cleanup code
 	////////////////////////////////////////////////////////////
@@ -96,7 +96,7 @@ int main(int argc, char **argv) {
 		//
 		// returns zero iff the window has closed
 		
-		open = qdspUpdate(plot, x, v, color, PART_NUM);
+		open = qdspUpdate(plot, x, v, NULL, PART_NUM);
 
 		////////////////////////////////////////////////////////////
 		
@@ -128,16 +128,21 @@ int main(int argc, char **argv) {
 }
 
 void init(double *x, double *v, int *color) {
+	double stdev = sqrt(50000 / (5.1e5));
 	for (int i = 0; i < PART_NUM; i++) {
 		x[i] = i * XMAX / PART_NUM;
 
 		if (i % 2) {
 			v[i] = 8.0;
-			color[i] = 0xffff00;
+			color[i] = 0xff0000;
 		} else {
 			v[i] = -8.0;
-			color[i] = 0xff3333;
+			color[i] = 0x0000ff;
 		}
+
+		double r1 = (rand() + 1) / ((double)RAND_MAX + 1); // log(0) breaks stuff
+		double r2 = (rand() + 1) / ((double)RAND_MAX + 1);
+		v[i] += stdev * sqrt(-2 * log(r1)) * cos(2 * M_PI * r2);
 	}
 }
 
@@ -155,7 +160,7 @@ void deposit(double *x, double *rho) {
 			int j = x[i] / DX;
 			double xg = j * DX;
 			myRho[j] += PART_CHARGE * (xg + DX - x[i]) / (DX * DX);
-			myRho[j+1] += PART_CHARGE * (x[i] - xg) / (DX * DX);
+			myRho[(j+1) % NGRID] += PART_CHARGE * (x[i] - xg) / (DX * DX);
 		}
 				
 #pragma omp critical

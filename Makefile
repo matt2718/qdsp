@@ -14,7 +14,7 @@ INSTPREFIX=/usr/local
 all: libqdsp.so
 
 .PHONY: debug
-debug: libqdsp.so
+debug: libqdsp.so example
 debug: CFLAGS += -g -O0
 debug: EXAMPLE_CFLAGS += -g -O0
 

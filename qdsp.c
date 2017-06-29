@@ -140,31 +140,36 @@ int qdspUpdate(QDSPplot *plot, double *x, double *y, int *color, int numVerts) {
 	if (glfwWindowShouldClose(plot->window)) {
 		glfwTerminate();
 		return 0;
-	} else {
-		glUseProgram(plot->shaderProgram);
-		
-		glBindBuffer(GL_ARRAY_BUFFER, plot->vertBufferObjX);
-		glBufferData(GL_ARRAY_BUFFER, numVerts * sizeof(double), x, GL_STREAM_DRAW);
-
-		glBindBuffer(GL_ARRAY_BUFFER, plot->vertBufferObjY);
-		glBufferData(GL_ARRAY_BUFFER, numVerts * sizeof(double), y, GL_STREAM_DRAW);
-		
-		if (color != NULL) {
-			glBindBuffer(GL_ARRAY_BUFFER, plot->vertBufferObjCol);
-			glBufferData(GL_ARRAY_BUFFER, numVerts * sizeof(int), color, GL_STREAM_DRAW);
-		}
-		glUniform1i(glGetUniformLocation(plot->shaderProgram, "useCustom"),
-		            color != NULL);
-		
-		glClear(GL_COLOR_BUFFER_BIT);
-		glBindVertexArray(plot->vertArrayObj);
-		glDrawArrays(GL_POINTS, 0, numVerts);
-
-		glfwSwapBuffers(plot->window);
-		glfwPollEvents();
-
-		return 1;
 	}
+
+	glUseProgram(plot->shaderProgram);
+		
+	glBindBuffer(GL_ARRAY_BUFFER, plot->vertBufferObjX);
+	glBufferData(GL_ARRAY_BUFFER, numVerts * sizeof(double), x, GL_STREAM_DRAW);
+
+	glBindBuffer(GL_ARRAY_BUFFER, plot->vertBufferObjY);
+	glBufferData(GL_ARRAY_BUFFER, numVerts * sizeof(double), y, GL_STREAM_DRAW);
+
+	glBindBuffer(GL_ARRAY_BUFFER, plot->vertBufferObjCol);
+
+	if (color == NULL) {
+		// we don't need a color buffer in this case, but the vertex shader segfaults
+		// unless we give data from *somewhere*, so we might as well use the x data.
+		glBufferData(GL_ARRAY_BUFFER, numVerts * sizeof(int), x, GL_STREAM_DRAW);
+	} else {
+		glBufferData(GL_ARRAY_BUFFER, numVerts * sizeof(int), color, GL_STREAM_DRAW);
+	}
+		
+	glUniform1i(glGetUniformLocation(plot->shaderProgram, "useCustom"), color != NULL);
+		
+	glClear(GL_COLOR_BUFFER_BIT);
+	glBindVertexArray(plot->vertArrayObj);
+	glDrawArrays(GL_POINTS, 0, numVerts);
+
+	glfwSwapBuffers(plot->window);
+	glfwPollEvents();
+
+	return 1;
 }
 
 void qdspDelete(QDSPplot *plot) {
