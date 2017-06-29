@@ -168,11 +168,6 @@ int qdspUpdate(QDSPplot *plot, double *x, double *y, int *color, int numVerts) {
 }
 
 void qdspDelete(QDSPplot *plot) {
-	glDeleteProgram(plot->shaderProgram);
-	glDeleteVertexArrays(1, &plot->vertArrayObj);
-	glDeleteBuffers(1, &plot->vertBufferObjX);
-	glDeleteBuffers(1, &plot->vertBufferObjY);
-	glDeleteBuffers(1, &plot->vertBufferObjCol);
 	free(plot);
 }
 
