@@ -72,7 +72,7 @@ QDSPplot *qdspInit(const char *title) {
 	glDeleteShader(vertexShader);
 	glDeleteShader(fragmentShader);
 
-	// buffer/array setup
+	// buffer setup
 	glGenVertexArrays(1, &plot->vertArrayObj);
 	glGenBuffers(1, &plot->vertBufferObjX);
 	glGenBuffers(1, &plot->vertBufferObjY);
@@ -89,7 +89,7 @@ QDSPplot *qdspInit(const char *title) {
 	glEnableVertexAttribArray(1);
 
 	glBindBuffer(GL_ARRAY_BUFFER, plot->vertBufferObjCol);
-	glVertexAttribPointer(2, 1, GL_INT, GL_FALSE, 0, NULL);
+	glVertexAttribIPointer(2, 1, GL_INT, 0, NULL);
 	glEnableVertexAttribArray(2);
 
 	// default bounds
@@ -126,24 +126,28 @@ void qdspSetBGColor(QDSPplot *plot, int rgb) {
 }
 
 int qdspUpdate(QDSPplot *plot, double *x, double *y, int *color, int numVerts) {
+	// get ms since last full update (not last call)
 	struct timespec lastTime = plot->lastTime;
 	struct timespec newTime;
 	clock_gettime(CLOCK_MONOTONIC, &newTime);
 	double timeDiff = ((double)newTime.tv_sec*1.0e3 + newTime.tv_nsec*1.0e-6) - 
 		((double)lastTime.tv_sec*1.0e3 + lastTime.tv_nsec*1.0e-6);
 
+	// this whole function is a waste of time if no frame update is needed
 	if (timeDiff >= 16)
 		plot->lastTime = newTime;
 	else
 		return 2;
-	
+
+	// someone closed the window
 	if (glfwWindowShouldClose(plot->window)) {
 		glfwTerminate();
 		return 0;
 	}
 
+	// copy all our vertex stuff
 	glUseProgram(plot->shaderProgram);
-		
+
 	glBindBuffer(GL_ARRAY_BUFFER, plot->vertBufferObjX);
 	glBufferData(GL_ARRAY_BUFFER, numVerts * sizeof(double), x, GL_STREAM_DRAW);
 
@@ -151,17 +155,13 @@ int qdspUpdate(QDSPplot *plot, double *x, double *y, int *color, int numVerts) {
 	glBufferData(GL_ARRAY_BUFFER, numVerts * sizeof(double), y, GL_STREAM_DRAW);
 
 	glBindBuffer(GL_ARRAY_BUFFER, plot->vertBufferObjCol);
+	glBufferData(GL_ARRAY_BUFFER, numVerts * sizeof(int), color, GL_STREAM_DRAW);
 
-	if (color == NULL) {
-		// we don't need a color buffer in this case, but the vertex shader segfaults
-		// unless we give data from *somewhere*, so we might as well use the x data.
-		glBufferData(GL_ARRAY_BUFFER, numVerts * sizeof(int), x, GL_STREAM_DRAW);
-	} else {
-		glBufferData(GL_ARRAY_BUFFER, numVerts * sizeof(int), color, GL_STREAM_DRAW);
-	}
-		
+
+	// should we use the default color?
 	glUniform1i(glGetUniformLocation(plot->shaderProgram, "useCustom"), color != NULL);
-		
+
+	// drawing
 	glClear(GL_COLOR_BUFFER_BIT);
 	glBindVertexArray(plot->vertArrayObj);
 	glDrawArrays(GL_POINTS, 0, numVerts);

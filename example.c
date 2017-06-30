@@ -90,13 +90,13 @@ int main(int argc, char **argv) {
 		// parameters 2 and 3: arrays of x and y coords, both of type double
 		//
 		// parameter 4: array of point colors (as RGB ints),
-		//     leave this NULL to use the default
+		//     leave this NULL to use the default color
 		//
 		// parameter 5: specifies the number of points to plot
 		//
-		// returns zero iff the window has closed
-		
-		open = qdspUpdate(plot, x, v, NULL, PART_NUM);
+		// the function returns zero iff the window has closed
+
+		open = qdspUpdate(plot, x, v, color, PART_NUM);
 
 		////////////////////////////////////////////////////////////
 		
