@@ -13,6 +13,8 @@ static int makeShader(char *buf, int size, GLenum type);
 
 static void resizeCallback(GLFWwindow *window, int width, int height);
 
+static void keyCallback(GLFWwindow *window, int key, int code, int action, int mods);
+
 QDSPplot *qdspInit(const char *title) {
 	QDSPplot *plot = malloc(sizeof(QDSPplot));
 
@@ -32,6 +34,7 @@ QDSPplot *qdspInit(const char *title) {
 	}
 	glfwMakeContextCurrent(plot->window);
 	glfwSetFramebufferSizeCallback(plot->window, resizeCallback);
+	glfwSetKeyCallback(plot->window, keyCallback);
 
 	// load extensions via GLAD
 	if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) {
@@ -133,7 +136,7 @@ int qdspUpdate(QDSPplot *plot, double *x, double *y, int *color, int numVerts) {
 	double timeDiff = ((double)newTime.tv_sec*1.0e3 + newTime.tv_nsec*1.0e-6) - 
 		((double)lastTime.tv_sec*1.0e3 + lastTime.tv_nsec*1.0e-6);
 
-	// this whole function is a waste of time if no frame update is needed
+	// the rest of the function is a waste of time if no frame update is needed
 	if (timeDiff >= 16)
 		plot->lastTime = newTime;
 	else
@@ -178,6 +181,13 @@ void qdspDelete(QDSPplot *plot) {
 
 static void resizeCallback(GLFWwindow *window, int width, int height) {
 	glViewport(0, 0, width, height);
+}
+
+static void keyCallback(GLFWwindow *window, int key, int code, int action, int mods) {
+	// close
+	if(key == GLFW_KEY_ESCAPE && action == GLFW_PRESS) {
+		glfwSetWindowShouldClose(window, 1);
+	}
 }
 
 static int makeShader(char *buf, int size, GLenum type) {
