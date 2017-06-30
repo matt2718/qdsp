@@ -33,9 +33,13 @@ QDSPplot *qdspInit(const char *title) {
 		return NULL;
 	}
 	glfwMakeContextCurrent(plot->window);
+
+	// we need to get the plot in the key hander
+	glfwSetWindowUserPointer(plot->window, plot);
+		
 	glfwSetFramebufferSizeCallback(plot->window, resizeCallback);
 	glfwSetKeyCallback(plot->window, keyCallback);
-
+	
 	// load extensions via GLAD
 	if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) {
 		fprintf(stderr, "Couldn't initialize GLAD\n");
@@ -102,6 +106,8 @@ QDSPplot *qdspInit(const char *title) {
 	qdspSetPointColor(plot, 0xffff33);
 	qdspSetBGColor(plot, 0x000000);
 
+	plot->paused = 0;
+	
 	// framerate stuff
 	clock_gettime(CLOCK_MONOTONIC, &plot->lastTime);
 
@@ -136,6 +142,10 @@ int qdspUpdate(QDSPplot *plot, double *x, double *y, int *color, int numVerts) {
 	double timeDiff = ((double)newTime.tv_sec*1.0e3 + newTime.tv_nsec*1.0e-6) - 
 		((double)lastTime.tv_sec*1.0e3 + lastTime.tv_nsec*1.0e-6);
 
+	while (plot->paused) {
+		glfwWaitEvents();
+	}
+	
 	// the rest of the function is a waste of time if no frame update is needed
 	if (timeDiff >= 16)
 		plot->lastTime = newTime;
@@ -160,7 +170,6 @@ int qdspUpdate(QDSPplot *plot, double *x, double *y, int *color, int numVerts) {
 	glBindBuffer(GL_ARRAY_BUFFER, plot->vertBufferObjCol);
 	glBufferData(GL_ARRAY_BUFFER, numVerts * sizeof(int), color, GL_STREAM_DRAW);
 
-
 	// should we use the default color?
 	glUniform1i(glGetUniformLocation(plot->shaderProgram, "useCustom"), color != NULL);
 
@@ -184,9 +193,18 @@ static void resizeCallback(GLFWwindow *window, int width, int height) {
 }
 
 static void keyCallback(GLFWwindow *window, int key, int code, int action, int mods) {
-	// close
-	if(key == GLFW_KEY_ESCAPE && action == GLFW_PRESS) {
+	QDSPplot *plot = glfwGetWindowUserPointer(window);
+	
+	// ESC - close
+	if ((key == GLFW_KEY_ESCAPE || key == GLFW_KEY_Q)
+	    && action == GLFW_PRESS) {
 		glfwSetWindowShouldClose(window, 1);
+		plot->paused = 0; // can't run cleanup code while paused
+	}
+
+	// p - pause
+	if (key == GLFW_KEY_P && action == GLFW_PRESS) {
+		plot->paused = !plot->paused;
 	}
 }
 

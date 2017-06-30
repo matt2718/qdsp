@@ -6,6 +6,8 @@
 typedef struct QDSPplot {
 	GLFWwindow *window;
 
+	int paused;
+
 	int shaderProgram;
 	unsigned int vertArrayObj;
 	unsigned int vertBufferObjX;
