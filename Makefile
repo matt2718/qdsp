@@ -41,6 +41,5 @@ shaders.h: $(SHADERS)
 qdsp.o: qdsp.h glad/glad.h shaders.h
 glad/glad.o: glad/glad.h glad/KHR/khrplatform.h
 
-
-example: example.c
-	$(CC) -o example $(EXAMPLE_CFLAGS) example.c -lm -lfftw3 -lqdsp
+example: example.c libqdsp.so
+	$(CC) -o example $(EXAMPLE_CFLAGS) example.c libqdsp.so -lm -lfftw3
