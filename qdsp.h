@@ -12,9 +12,6 @@ typedef struct QDSPplot {
 	unsigned int vertBufferObjY;
 	unsigned int vertBufferObjCol;
 
-	double xMin, xMax;
-	double yMin, yMax;
-
 	struct timespec lastTime;
 
 } QDSPplot;
