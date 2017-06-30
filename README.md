@@ -22,6 +22,6 @@ After building, this will install the shared library to `/usr/local/lib` and the
 
 ## Usage
 
-As of now, I have not written any documentation. This will change very soon. Check the file `example.c` for a basic example of a PIC simulation with QDSP (run `make example` if you want to try it out).
+As of now, I have not written any documentation. This will change very soon. Check the file `example.c` for a basic example of a PIC simulation with QDSP (run `make example` after installing the library if you want to try it out).
 
 Remember to `#include <qdsp.h>`
