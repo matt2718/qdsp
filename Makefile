@@ -20,15 +20,24 @@ debug: EXAMPLE_CFLAGS += -g -O0
 
 .PHONY: clean
 clean:
-	rm -f libqdsp.so $(OBJECTS) shaders.h
+	rm -f libqdsp.so $(OBJECTS)
+	rm -f example
 
 .PHONY: install
 install: libqdsp.so qdsp.h
-	mkdir -p $(INSTPREFIX)/share/qdsp/
-	cp libqdsp.so $(INSTPREFIX)/lib/
-	cp qdsp.h $(INSTPREFIX)/include/
-	cp fragment.glsl vertex.glsl $(INSTPREFIX)/share/qdsp/
+	mkdir -p $(INSTPREFIX)/share/qdsp
+	cp libqdsp.so $(INSTPREFIX)/lib
+	cp qdsp.h $(INSTPREFIX)/include
+	cp fragment.glsl vertex.glsl $(INSTPREFIX)/share/qdsp
 	@echo "Installed successfully. You may need to run ldconfig."
+
+.PHONY: uninstall
+uninstall:
+	rm -rf $(INSTPREFIX)/share/qdsp
+	rm -f $(INSTPREFIX)/lib/libqdsp.so
+	rm -f $(INSTPREFIX)/include/qdsp.h
+
+# actual rules and dependencies here:
 
 libqdsp.so: $(OBJECTS)
 	$(CC) -o libqdsp.so $(CFLAGS) $(LDFLAGS) $(OBJECTS) $(LDLIBS)
@@ -36,9 +45,9 @@ libqdsp.so: $(OBJECTS)
 .c.o:
 	$(CC) -o $@ -c $(CFLAGS) $<
 
+example: example.c libqdsp.so
+	$(CC) -o example $(EXAMPLE_CFLAGS) example.c libqdsp.so -lm -lfftw3 -Lqdsp -Wl,-R.
+
 qdsp.o: qdsp.h glad/glad.h
 
 glad/glad.o: glad/glad.h glad/KHR/khrplatform.h
-
-example: example.c libqdsp.so
-	$(CC) -o example $(EXAMPLE_CFLAGS) example.c libqdsp.so -lm -lfftw3
