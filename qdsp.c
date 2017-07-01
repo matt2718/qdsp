@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <math.h>
 #include <time.h>
 #include <omp.h>
@@ -9,7 +10,7 @@
 
 #include "qdsp.h"
 
-static int makeShader(char *buf, int size, GLenum type);
+static int makeShader(const char *filename, GLenum type);
 
 static void resizeCallback(GLFWwindow *window, int width, int height);
 
@@ -42,9 +43,8 @@ QDSPplot *qdspInit(const char *title) {
 	}
 
 	// create shaders and link program
-#include "shaders.h"
-	int vertexShader = makeShader(vertex_glsl, vertex_glsl_len, GL_VERTEX_SHADER);
-	int fragmentShader = makeShader(fragment_glsl, fragment_glsl_len, GL_FRAGMENT_SHADER);
+	int vertexShader = makeShader("vertex.glsl", GL_VERTEX_SHADER);
+	int fragmentShader = makeShader("fragment.glsl", GL_FRAGMENT_SHADER);
 
 	if (vertexShader == 0 || fragmentShader == 0) {
 		glfwTerminate();
@@ -180,7 +180,33 @@ static void resizeCallback(GLFWwindow *window, int width, int height) {
 	glViewport(0, 0, width, height);
 }
 
-static int makeShader(char *buf, int size, GLenum type) {
+static int makeShader(const char *filename, GLenum type) {
+	// will fail with a crazy-long filename, but users can't call this anyway
+	char fullpath[256] = "/usr/local/share/qdsp/";
+	strcat(fullpath, filename);
+	FILE *file = fopen(fullpath, "r");
+
+	// try current directory if it failed
+	if (file == NULL) file = fopen(filename, "r");
+	
+	if (file == NULL) {
+		fprintf(stderr, "Could not find file: %s\n", fullpath);
+		fprintf(stderr, "Could not find file: ./%s\n", filename);
+		return 0;
+	}
+
+	// allocate memory
+	int size;
+	char *buf;
+	fseek(file, 0L, SEEK_END);
+	size = ftell(file); // file length
+	rewind(file);
+	buf = malloc(size * sizeof(char));
+
+	fread(buf, 1, size, file);
+
+	fclose(file);
+
 	int shader = glCreateShader(type);
 	glShaderSource(shader, 1, (const GLchar**)&buf, &size);
 	glCompileShader(shader);
@@ -191,16 +217,12 @@ static int makeShader(char *buf, int size, GLenum type) {
 	if (!success) {
 		char log[1024];
 		glGetShaderInfoLog(shader, 1024, NULL, log);
-		if (type == GL_VERTEX_SHADER)
-			fprintf(stderr, "Error compiling vertex shader\n");
-		else if (type == GL_FRAGMENT_SHADER)
-			fprintf(stderr, "Error compiling fragment shader\n");
-		else
-			fprintf(stderr, "Error compiling shader\n");
-
+		fprintf(stderr, "Error compiling shader from file: %s\n", filename);
 		fprintf(stderr, "%s\n", log);
+		free(buf);
 		return 0;
 	}
 
+	free(buf);
 	return shader;
 }

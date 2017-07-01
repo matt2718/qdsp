@@ -24,8 +24,10 @@ clean:
 
 .PHONY: install
 install: libqdsp.so qdsp.h
+	mkdir -p $(INSTPREFIX)/share/qdsp/
 	cp libqdsp.so $(INSTPREFIX)/lib/
 	cp qdsp.h $(INSTPREFIX)/include/
+	cp fragment.glsl vertex.glsl $(INSTPREFIX)/share/qdsp/
 	@echo "Installed successfully. You may need to run ldconfig."
 
 libqdsp.so: $(OBJECTS)
@@ -34,11 +36,8 @@ libqdsp.so: $(OBJECTS)
 .c.o:
 	$(CC) -o $@ -c $(CFLAGS) $<
 
-shaders.h: $(SHADERS)
-	xxd -i vertex.glsl > shaders.h
-	xxd -i fragment.glsl >> shaders.h
+qdsp.o: qdsp.h glad/glad.h
 
-qdsp.o: qdsp.h glad/glad.h shaders.h
 glad/glad.o: glad/glad.h glad/KHR/khrplatform.h
 
 example: example.c libqdsp.so
