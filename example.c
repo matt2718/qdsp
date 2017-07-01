@@ -5,7 +5,7 @@
 #include <fftw3.h>
 #include <omp.h>
 
-#include <qdsp.h>
+#include "qdsp.h"
 
 const double XMAX = 16.0; // system length
 const int NGRID = 256; // grid size

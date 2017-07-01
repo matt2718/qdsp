@@ -22,6 +22,6 @@ After building, this will install the shared library to `/usr/local/lib` and the
 
 ## Usage
 
-As of now, I have not written any documentation. This will change very soon. Check the file `example.c` for a basic example of a PIC simulation with QDSP (run `make example` after installing the library if you want to try it out).
+Just put `#include <qdsp.h>` in your code and link with -lqdsp.
 
-Remember to `#include <qdsp.h>`
+As of now, I have not written any documentation. This will change very soon. Check the file `example.c` for a basic example of a phase plot with QDSP (run `make example` if you want to try it out). It uses QDSP to render the phase plot of a 1D PIC simulation.
