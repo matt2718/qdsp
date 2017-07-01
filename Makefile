@@ -5,7 +5,7 @@ LDLIBS=-lglfw
 EXAMPLE_CFLAGS=-std=gnu99 -fopenmp
 
 SOURCES=qdsp.c glad/glad.c
-SHADERS=vertex.glsl fragment.glsl
+SHADERS=vertex.glsl fragment.glsl overlay-vertex.glsl overlay-fragment.glsl
 OBJECTS=$(SOURCES:.c=.o)
 
 INSTPREFIX=/usr/local
@@ -28,7 +28,7 @@ install: libqdsp.so qdsp.h
 	mkdir -p $(INSTPREFIX)/share/qdsp
 	cp libqdsp.so $(INSTPREFIX)/lib
 	cp qdsp.h $(INSTPREFIX)/include
-	cp fragment.glsl vertex.glsl $(INSTPREFIX)/share/qdsp
+	cp $(SHADERS) $(INSTPREFIX)/share/qdsp
 	@echo "Installed successfully. You may need to run ldconfig."
 
 .PHONY: uninstall

@@ -50,10 +50,17 @@ QDSPplot *qdspInit(const char *title) {
 	}
 
 	// create shaders and link program
+
+	// for points
 	int vertexShader = makeShader("vertex.glsl", GL_VERTEX_SHADER);
 	int fragmentShader = makeShader("fragment.glsl", GL_FRAGMENT_SHADER);
 
-	if (vertexShader == 0 || fragmentShader == 0) {
+	// for overlay
+	int overVertexShader = makeShader("overlay-vertex.glsl", GL_VERTEX_SHADER);
+	int overFragmentShader = makeShader("overlay-fragment.glsl", GL_FRAGMENT_SHADER);
+	
+	if (vertexShader == 0 || fragmentShader == 0 ||
+	    overVertexShader == 0 || overFragmentShader == 0) {
 		glfwTerminate();
 		free(plot);
 		return NULL;
@@ -64,9 +71,15 @@ QDSPplot *qdspInit(const char *title) {
 	glAttachShader(plot->shaderProgram, fragmentShader);
 	glLinkProgram(plot->shaderProgram);
 
-	int success;
-	glGetProgramiv(plot->shaderProgram, GL_LINK_STATUS, &success);
-	if (!success) {
+	plot->overShaderProgram = glCreateProgram();
+	glAttachShader(plot->overShaderProgram, overVertexShader);
+	glAttachShader(plot->overShaderProgram, overFragmentShader);
+	glLinkProgram(plot->overShaderProgram);
+
+	int pointSuccess, overSuccess;
+	glGetProgramiv(plot->shaderProgram, GL_LINK_STATUS, &pointSuccess);
+	glGetProgramiv(plot->overShaderProgram, GL_LINK_STATUS, &overSuccess);
+	if (!pointSuccess || !overSuccess) {
 		char log[1024];
 		glGetProgramInfoLog(plot->shaderProgram, 1024, NULL, log);
 		fprintf(stderr, "Error linking program\n");
@@ -78,8 +91,10 @@ QDSPplot *qdspInit(const char *title) {
 
 	glDeleteShader(vertexShader);
 	glDeleteShader(fragmentShader);
+	glDeleteShader(overVertexShader);
+	glDeleteShader(overFragmentShader);
 
-	// buffer setup
+	// buffer setup for points
 	glGenVertexArrays(1, &plot->vertArrayObj);
 	glGenBuffers(1, &plot->vertBufferObjX);
 	glGenBuffers(1, &plot->vertBufferObjY);
@@ -99,6 +114,33 @@ QDSPplot *qdspInit(const char *title) {
 	glVertexAttribIPointer(2, 1, GL_INT, 0, NULL);
 	glEnableVertexAttribArray(2);
 
+	// buffer setup for overlay
+	glGenVertexArrays(1, &plot->overVAO);
+	glGenBuffers(1, &plot->overVBO);
+	
+	glBindVertexArray(plot->overVAO);
+
+	glBindBuffer(GL_ARRAY_BUFFER, plot->overVBO);
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), NULL);
+	glEnableVertexAttribArray(0);
+
+	// coords for overlay
+	float overVertices[] = {
+		// lower left triangle
+		0.0f, 0.0f, 1.0f,
+		0.0f, 1.0f, 1.0f,
+		1.0f, 0.0f, 1.0f,
+		// upper right triangle
+		0.0f, 1.0f, 1.0f,
+		1.0f, 0.0f, 1.0f,
+		1.0f, 1.0f, 1.0f
+	};
+	glBufferData(GL_ARRAY_BUFFER, sizeof(overVertices), overVertices, GL_STATIC_DRAW);
+
+	// transparency
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA); 
+	
 	// default bounds
 	qdspSetBounds(plot, -1.0f, 1.0f, -1.0f, 1.0f);
 
@@ -107,6 +149,7 @@ QDSPplot *qdspInit(const char *title) {
 	qdspSetBGColor(plot, 0x000000);
 
 	plot->paused = 0;
+	plot->overlay = 0;
 	
 	// framerate stuff
 	clock_gettime(CLOCK_MONOTONIC, &plot->lastTime);
@@ -175,9 +218,16 @@ int qdspUpdate(QDSPplot *plot, double *x, double *y, int *color, int numVerts) {
 
 	// drawing
 	glClear(GL_COLOR_BUFFER_BIT);
+	
 	glBindVertexArray(plot->vertArrayObj);
 	glDrawArrays(GL_POINTS, 0, numVerts);
 
+	if (plot->overlay) {
+		glUseProgram(plot->overShaderProgram);
+		glBindVertexArray(plot->overVAO);
+		glDrawArrays(GL_TRIANGLES, 0, 6);
+	}
+	
 	glfwSwapBuffers(plot->window);
 	glfwPollEvents();
 
@@ -196,6 +246,7 @@ static void keyCallback(GLFWwindow *window, int key, int code, int action, int m
 	QDSPplot *plot = glfwGetWindowUserPointer(window);
 	
 	// ESC - close
+	// q - close
 	if ((key == GLFW_KEY_ESCAPE || key == GLFW_KEY_Q)
 	    && action == GLFW_PRESS) {
 		glfwSetWindowShouldClose(window, 1);
@@ -205,6 +256,11 @@ static void keyCallback(GLFWwindow *window, int key, int code, int action, int m
 	// p - pause
 	if (key == GLFW_KEY_P && action == GLFW_PRESS) {
 		plot->paused = !plot->paused;
+	}
+
+	// h - display help
+	if (key == GLFW_KEY_H && action == GLFW_PRESS) {
+		plot->overlay = !plot->overlay;
 	}
 }
 
