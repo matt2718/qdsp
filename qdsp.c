@@ -7,6 +7,7 @@
 
 #include "glad/glad.h"
 #include <GLFW/glfw3.h>
+#include <SOIL/SOIL.h>
 
 #include "qdsp.h"
 
@@ -137,6 +138,37 @@ QDSPplot *qdspInit(const char *title) {
 	};
 	glBufferData(GL_ARRAY_BUFFER, sizeof(overVertices), overVertices, GL_STATIC_DRAW);
 
+	// overlay texture
+	glGenTextures(1, &plot->overTex);
+	glBindTexture(GL_TEXTURE_2D, plot->overTex);
+
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+	// load image with SOIL
+	int imgWidth, imgHeight;
+	unsigned char *imgData =
+		SOIL_load_image("helpmessage.png", &imgWidth, &imgHeight, NULL, SOIL_LOAD_RGB);
+	if (imgData == NULL) { // loading failed
+		fprintf(stderr, "Error loading image file helpmessage.png\n");
+		glfwTerminate();
+		free(plot);
+		return NULL;
+	}
+
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, imgWidth, imgHeight, 0, GL_RGB,
+	             GL_UNSIGNED_BYTE, imgData);
+	
+	SOIL_free_image_data(imgData);
+
+	// dimensions
+	glUseProgram(plot->overShaderProgram);
+	glUniform2f(glGetUniformLocation(plot->overShaderProgram, "imgDims"),
+	            imgWidth, imgHeight);
+	resizeCallback(plot->window, 800, 600);
+	
 	// transparency
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA); 
@@ -225,6 +257,7 @@ int qdspUpdate(QDSPplot *plot, double *x, double *y, int *color, int numVerts) {
 	if (plot->overlay) {
 		glUseProgram(plot->overShaderProgram);
 		glBindVertexArray(plot->overVAO);
+		glBindTexture(GL_TEXTURE_2D, plot->overTex);
 		glDrawArrays(GL_TRIANGLES, 0, 6);
 	}
 	
@@ -239,6 +272,11 @@ void qdspDelete(QDSPplot *plot) {
 }
 
 static void resizeCallback(GLFWwindow *window, int width, int height) {
+	QDSPplot *plot = glfwGetWindowUserPointer(window);
+	glUseProgram(plot->overShaderProgram);
+	glUniform2f(glGetUniformLocation(plot->overShaderProgram, "pixDims"),
+	            width, height);
+	
 	glViewport(0, 0, width, height);
 }
 

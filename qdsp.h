@@ -18,6 +18,7 @@ typedef struct QDSPplot {
 	int overShaderProgram;
 	unsigned int overVAO;
 	unsigned int overVBO;
+	unsigned int overTex;
 	
 	struct timespec lastTime;
 

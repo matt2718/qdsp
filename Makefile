@@ -1,7 +1,7 @@
 CC=gcc
 CFLAGS=-std=gnu99 -fPIC
 LDFLAGS=-shared
-LDLIBS=-lglfw
+LDLIBS=-lglfw -lSOIL
 EXAMPLE_CFLAGS=-std=gnu99 -fopenmp
 
 SOURCES=qdsp.c glad/glad.c
@@ -11,7 +11,7 @@ OBJECTS=$(SOURCES:.c=.o)
 INSTPREFIX=/usr/local
 
 .PHONY: all
-all: libqdsp.so
+all: libqdsp.so helpmessage.png
 
 .PHONY: debug
 debug: libqdsp.so example
@@ -47,6 +47,10 @@ libqdsp.so: $(OBJECTS)
 
 example: example.c libqdsp.so
 	$(CC) -o example $(EXAMPLE_CFLAGS) example.c libqdsp.so -lm -lfftw3 -Lqdsp -Wl,-R.
+
+helpmessage.png:
+	convert -size 400x400 xc:black -font "Ubuntu-Mono" -pointsize 16 \
+	-fill white -annotate +15+15 "$$(cat helpmessage)" helpmessage.png
 
 qdsp.o: qdsp.h glad/glad.h
 
