@@ -311,16 +311,20 @@ static void keyCallback(GLFWwindow *window, int key, int code, int action, int m
 
 static int makeShader(const char *filename, GLenum type) {
 	// will fail with a crazy-long filename, but users can't call this anyway
-	char fullpath[256] = "/usr/local/share/qdsp/";
+	char fullpath[256] = "/usr/local/share/qdsp/shaders/";
+	char localpath[256] = "./shaders/";
 	strcat(fullpath, filename);
 	FILE *file = fopen(fullpath, "r");
 
 	// try current directory if it failed
-	if (file == NULL) file = fopen(filename, "r");
+	if (file == NULL) {
+		strcat(localpath, filename);
+		file = fopen(localpath, "r");
+	}
 	
 	if (file == NULL) {
 		fprintf(stderr, "Could not find file: %s\n", fullpath);
-		fprintf(stderr, "Could not find file: ./%s\n", filename);
+		fprintf(stderr, "Could not find file: ./%s\n", localpath);
 		return 0;
 	}
 

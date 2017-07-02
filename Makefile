@@ -1,14 +1,16 @@
 CC=gcc
-CFLAGS=-std=gnu99 -fPIC
+CFLAGS=-std=gnu99 -fPIC -I./include
 LDFLAGS=-shared
 LDLIBS=-lGL -lglfw -lSOIL
-EXAMPLE_CFLAGS=-std=gnu99 -fopenmp
+EXAMPLE_CFLAGS=-std=gnu99 -fopenmp -I./include
 
-SOURCES=qdsp.c glad/glad.c
+SOURCES=qdsp.c glad.c
 SHADERS=vertex.glsl fragment.glsl overlay-vertex.glsl overlay-fragment.glsl
 OBJECTS=$(SOURCES:.c=.o)
 
 INSTPREFIX=/usr/local
+
+VPATH = src:include:shaders:resources
 
 .PHONY: all
 all: libqdsp.so helpmessage.png
@@ -26,10 +28,11 @@ clean:
 
 .PHONY: install
 install: libqdsp.so qdsp.h $(SHADERS) helpmessage.png
-	mkdir -p $(INSTPREFIX)/share/qdsp
+	mkdir -p $(INSTPREFIX)/share/qdsp/resources
 	cp libqdsp.so $(INSTPREFIX)/lib
-	cp qdsp.h $(INSTPREFIX)/include
-	cp $(SHADERS) helpmessage.png $(INSTPREFIX)/share/qdsp
+	cp include/qdsp.h $(INSTPREFIX)/include
+	cp -r shaders $(INSTPREFIX)/share/qdsp
+	cp helpmessage.png $(INSTPREFIX)/share/qdsp/resources
 	@echo "Installed successfully. You may need to run ldconfig."
 
 .PHONY: uninstall
@@ -47,12 +50,12 @@ libqdsp.so: $(OBJECTS)
 	$(CC) -o $@ -c $(CFLAGS) $<
 
 example: example.c libqdsp.so
-	$(CC) -o example $(EXAMPLE_CFLAGS) example.c libqdsp.so -lm -lfftw3 -Lqdsp -Wl,-R.
+	$(CC) -o example $(EXAMPLE_CFLAGS) $< libqdsp.so -lm -lfftw3 -Lqdsp -Wl,-R.
 
-helpmessage.png:
+helpmessage.png: helpmessage
 	convert -size 400x400 xc:black -font "Ubuntu-Mono" -pointsize 16 \
-	-fill white -annotate +15+15 "$$(cat helpmessage)" helpmessage.png
+	-fill white -annotate +15+15 "$$(cat resources/helpmessage)" helpmessage.png
 
 qdsp.o: qdsp.h glad/glad.h
 
-glad/glad.o: glad/glad.h glad/KHR/khrplatform.h
+glad.o: glad/glad.h KHR/khrplatform.h

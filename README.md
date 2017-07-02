@@ -19,7 +19,7 @@ To install, just run:
 
     $ make
     $ sudo make install
-	$ sudo ldconfig
+    $ sudo ldconfig
 
 After building, this will install the shared library to `/usr/local/lib` and the header to `/usr/local/include`. You may need to add `/usr/local/lib` to your system's ldconfig path.
 
@@ -27,4 +27,4 @@ After building, this will install the shared library to `/usr/local/lib` and the
 
 Just put `#include <qdsp.h>` in your code and link with -lqdsp.
 
-As of now, I have not written any documentation. This will change very soon. Check the file `example.c` for a basic example of a phase plot with QDSP (run `make example` if you want to try it out). It uses QDSP to render the phase plot of a 1D PIC simulation.
+As of now, I have not written any documentation. This will change very soon. Check the file `src/example.c` for a basic example of a phase plot with QDSP (run `make example` if you want to try it out). It uses QDSP to render the phase plot of a 1D PIC simulation.
