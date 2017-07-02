@@ -53,36 +53,35 @@ QDSPplot *qdspInit(const char *title) {
 	// create shaders and link program
 
 	// for points
-	int vertexShader = makeShader("vertex.glsl", GL_VERTEX_SHADER);
-	int fragmentShader = makeShader("fragment.glsl", GL_FRAGMENT_SHADER);
+	int pointsVert = makeShader("points.vert.glsl", GL_VERTEX_SHADER);
+	int pointsFrag = makeShader("points.frag.glsl", GL_FRAGMENT_SHADER);
 
 	// for overlay
-	int overVertexShader = makeShader("overlay-vertex.glsl", GL_VERTEX_SHADER);
-	int overFragmentShader = makeShader("overlay-fragment.glsl", GL_FRAGMENT_SHADER);
+	int overVert = makeShader("overlay.vert.glsl", GL_VERTEX_SHADER);
+	int overFrag = makeShader("overlay.frag.glsl", GL_FRAGMENT_SHADER);
 	
-	if (vertexShader == 0 || fragmentShader == 0 ||
-	    overVertexShader == 0 || overFragmentShader == 0) {
+	if (pointsVert == 0 || pointsFrag == 0 || overVert == 0 || overFrag == 0) {
 		glfwTerminate();
 		free(plot);
 		return NULL;
 	}
 
-	plot->shaderProgram = glCreateProgram();
-	glAttachShader(plot->shaderProgram, vertexShader);
-	glAttachShader(plot->shaderProgram, fragmentShader);
-	glLinkProgram(plot->shaderProgram);
+	plot->pointsProgram = glCreateProgram();
+	glAttachShader(plot->pointsProgram, pointsVert);
+	glAttachShader(plot->pointsProgram, pointsFrag);
+	glLinkProgram(plot->pointsProgram);
 
-	plot->overShaderProgram = glCreateProgram();
-	glAttachShader(plot->overShaderProgram, overVertexShader);
-	glAttachShader(plot->overShaderProgram, overFragmentShader);
-	glLinkProgram(plot->overShaderProgram);
+	plot->overlayProgram = glCreateProgram();
+	glAttachShader(plot->overlayProgram, overVert);
+	glAttachShader(plot->overlayProgram, overFrag);
+	glLinkProgram(plot->overlayProgram);
 
 	int pointSuccess, overSuccess;
-	glGetProgramiv(plot->shaderProgram, GL_LINK_STATUS, &pointSuccess);
-	glGetProgramiv(plot->overShaderProgram, GL_LINK_STATUS, &overSuccess);
+	glGetProgramiv(plot->pointsProgram, GL_LINK_STATUS, &pointSuccess);
+	glGetProgramiv(plot->overlayProgram, GL_LINK_STATUS, &overSuccess);
 	if (!pointSuccess || !overSuccess) {
 		char log[1024];
-		glGetProgramInfoLog(plot->shaderProgram, 1024, NULL, log);
+		glGetProgramInfoLog(plot->pointsProgram, 1024, NULL, log);
 		fprintf(stderr, "Error linking program\n");
 		fprintf(stderr, "%s\n", log);
 		glfwTerminate();
@@ -90,38 +89,38 @@ QDSPplot *qdspInit(const char *title) {
 		return NULL;
 	}
 
-	glDeleteShader(vertexShader);
-	glDeleteShader(fragmentShader);
-	glDeleteShader(overVertexShader);
-	glDeleteShader(overFragmentShader);
+	glDeleteShader(pointsVert);
+	glDeleteShader(pointsFrag);
+	glDeleteShader(overVert);
+	glDeleteShader(overFrag);
 
 	// buffer setup for points
-	glGenVertexArrays(1, &plot->vertArrayObj);
-	glGenBuffers(1, &plot->vertBufferObjX);
-	glGenBuffers(1, &plot->vertBufferObjY);
-	glGenBuffers(1, &plot->vertBufferObjCol);
+	glGenVertexArrays(1, &plot->pointsVAO);
+	glGenBuffers(1, &plot->pointsVBOx);
+	glGenBuffers(1, &plot->pointsVBOy);
+	glGenBuffers(1, &plot->pointsVBOrgb);
 
-	glBindVertexArray(plot->vertArrayObj);
+	glBindVertexArray(plot->pointsVAO);
 
-	glBindBuffer(GL_ARRAY_BUFFER, plot->vertBufferObjX);
+	glBindBuffer(GL_ARRAY_BUFFER, plot->pointsVBOx);
 	glVertexAttribPointer(0, 1, GL_DOUBLE, GL_FALSE, 0, NULL);
 	glEnableVertexAttribArray(0);
 
-	glBindBuffer(GL_ARRAY_BUFFER, plot->vertBufferObjY);
+	glBindBuffer(GL_ARRAY_BUFFER, plot->pointsVBOy);
 	glVertexAttribPointer(1, 1, GL_DOUBLE, GL_FALSE, 0, NULL);
 	glEnableVertexAttribArray(1);
 
-	glBindBuffer(GL_ARRAY_BUFFER, plot->vertBufferObjCol);
+	glBindBuffer(GL_ARRAY_BUFFER, plot->pointsVBOrgb);
 	glVertexAttribIPointer(2, 1, GL_INT, 0, NULL);
 	glEnableVertexAttribArray(2);
 
 	// buffer setup for overlay
-	glGenVertexArrays(1, &plot->overVAO);
-	glGenBuffers(1, &plot->overVBO);
+	glGenVertexArrays(1, &plot->overlayVAO);
+	glGenBuffers(1, &plot->overlayVBO);
 	
-	glBindVertexArray(plot->overVAO);
+	glBindVertexArray(plot->overlayVAO);
 
-	glBindBuffer(GL_ARRAY_BUFFER, plot->overVBO);
+	glBindBuffer(GL_ARRAY_BUFFER, plot->overlayVBO);
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), NULL);
 	glEnableVertexAttribArray(0);
 
@@ -139,8 +138,8 @@ QDSPplot *qdspInit(const char *title) {
 	glBufferData(GL_ARRAY_BUFFER, sizeof(overVertices), overVertices, GL_STATIC_DRAW);
 
 	// overlay texture
-	glGenTextures(1, &plot->overTex);
-	glBindTexture(GL_TEXTURE_2D, plot->overTex);
+	glGenTextures(1, &plot->overlayTexture);
+	glBindTexture(GL_TEXTURE_2D, plot->overlayTexture);
 
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
@@ -171,8 +170,8 @@ QDSPplot *qdspInit(const char *title) {
 	SOIL_free_image_data(imgData);
 
 	// dimensions
-	glUseProgram(plot->overShaderProgram);
-	glUniform2f(glGetUniformLocation(plot->overShaderProgram, "imgDims"),
+	glUseProgram(plot->overlayProgram);
+	glUniform2f(glGetUniformLocation(plot->overlayProgram, "imgDims"),
 	            imgWidth, imgHeight);
 	resizeCallback(plot->window, 800, 600);
 	
@@ -197,16 +196,16 @@ QDSPplot *qdspInit(const char *title) {
 }
 
 void qdspSetBounds(QDSPplot *plot, double xMin, double xMax, double yMin, double yMax) {
-	glUseProgram(plot->shaderProgram);
-	glUniform1f(glGetUniformLocation(plot->shaderProgram, "xMin"), xMin);
-	glUniform1f(glGetUniformLocation(plot->shaderProgram, "xMax"), xMax);
-	glUniform1f(glGetUniformLocation(plot->shaderProgram, "yMin"), yMin);
-	glUniform1f(glGetUniformLocation(plot->shaderProgram, "yMax"), yMax);
+	glUseProgram(plot->pointsProgram);
+	glUniform1f(glGetUniformLocation(plot->pointsProgram, "xMin"), xMin);
+	glUniform1f(glGetUniformLocation(plot->pointsProgram, "xMax"), xMax);
+	glUniform1f(glGetUniformLocation(plot->pointsProgram, "yMin"), yMin);
+	glUniform1f(glGetUniformLocation(plot->pointsProgram, "yMax"), yMax);
 }
 
 void qdspSetPointColor(QDSPplot *plot, int rgb) {
-	glUseProgram(plot->shaderProgram);
-	glUniform1i(glGetUniformLocation(plot->shaderProgram, "defaultColor"), rgb);
+	glUseProgram(plot->pointsProgram);
+	glUniform1i(glGetUniformLocation(plot->pointsProgram, "defaultColor"), rgb);
 }
 
 void qdspSetBGColor(QDSPplot *plot, int rgb) {
@@ -241,30 +240,30 @@ int qdspUpdate(QDSPplot *plot, double *x, double *y, int *color, int numVerts) {
 	}
 
 	// copy all our vertex stuff
-	glUseProgram(plot->shaderProgram);
+	glUseProgram(plot->pointsProgram);
 
-	glBindBuffer(GL_ARRAY_BUFFER, plot->vertBufferObjX);
+	glBindBuffer(GL_ARRAY_BUFFER, plot->pointsVBOx);
 	glBufferData(GL_ARRAY_BUFFER, numVerts * sizeof(double), x, GL_STREAM_DRAW);
 
-	glBindBuffer(GL_ARRAY_BUFFER, plot->vertBufferObjY);
+	glBindBuffer(GL_ARRAY_BUFFER, plot->pointsVBOy);
 	glBufferData(GL_ARRAY_BUFFER, numVerts * sizeof(double), y, GL_STREAM_DRAW);
 
-	glBindBuffer(GL_ARRAY_BUFFER, plot->vertBufferObjCol);
+	glBindBuffer(GL_ARRAY_BUFFER, plot->pointsVBOrgb);
 	glBufferData(GL_ARRAY_BUFFER, numVerts * sizeof(int), color, GL_STREAM_DRAW);
 
 	// should we use the default color?
-	glUniform1i(glGetUniformLocation(plot->shaderProgram, "useCustom"), color != NULL);
+	glUniform1i(glGetUniformLocation(plot->pointsProgram, "useCustom"), color != NULL);
 
 	// drawing
 	glClear(GL_COLOR_BUFFER_BIT);
 	
-	glBindVertexArray(plot->vertArrayObj);
+	glBindVertexArray(plot->pointsVAO);
 	glDrawArrays(GL_POINTS, 0, numVerts);
 
 	if (plot->overlay) {
-		glUseProgram(plot->overShaderProgram);
-		glBindVertexArray(plot->overVAO);
-		glBindTexture(GL_TEXTURE_2D, plot->overTex);
+		glUseProgram(plot->overlayProgram);
+		glBindVertexArray(plot->overlayVAO);
+		glBindTexture(GL_TEXTURE_2D, plot->overlayTexture);
 		glDrawArrays(GL_TRIANGLES, 0, 6);
 	}
 	
@@ -280,8 +279,8 @@ void qdspDelete(QDSPplot *plot) {
 
 static void resizeCallback(GLFWwindow *window, int width, int height) {
 	QDSPplot *plot = glfwGetWindowUserPointer(window);
-	glUseProgram(plot->overShaderProgram);
-	glUniform2f(glGetUniformLocation(plot->overShaderProgram, "pixDims"),
+	glUseProgram(plot->overlayProgram);
+	glUniform2f(glGetUniformLocation(plot->overlayProgram, "pixDims"),
 	            width, height);
 	
 	glViewport(0, 0, width, height);

@@ -9,16 +9,16 @@ typedef struct QDSPplot {
 	int paused;
 	int overlay;
 
-	int shaderProgram;
-	unsigned int vertArrayObj;
-	unsigned int vertBufferObjX;
-	unsigned int vertBufferObjY;
-	unsigned int vertBufferObjCol;
+	int pointsProgram;
+	unsigned int pointsVAO;
+	unsigned int pointsVBOx;
+	unsigned int pointsVBOy;
+	unsigned int pointsVBOrgb;
 
-	int overShaderProgram;
-	unsigned int overVAO;
-	unsigned int overVBO;
-	unsigned int overTex;
+	int overlayProgram;
+	unsigned int overlayVAO;
+	unsigned int overlayVBO;
+	unsigned int overlayTexture;
 	
 	struct timespec lastTime;
 
