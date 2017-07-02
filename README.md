@@ -10,7 +10,10 @@ QDSP is still in early development, and should not be considered stable under an
 
 So far, QDSP is only ported to Linux. There's a good chance that it will work on Mac, but I haven't tested it. At some point in the near future, I'll redo the build system in CMake and make sure it runs on everything.
 
-QDSP's only dependency is GLFW 3.
+QDSP requires the following dependencies, which should be available in most package repositories:
+
+* [GLFW 3](http://www.glfw.org/docs/latest/)
+* [SOIL](http://www.lonesock.net/soil.html)
 
 To install, just run:
 
