@@ -13,6 +13,8 @@
 
 static int makeShader(const char *filename, GLenum type);
 
+static void closeCallback(GLFWwindow *window);
+
 static void resizeCallback(GLFWwindow *window, int width, int height);
 
 static void keyCallback(GLFWwindow *window, int key, int code, int action, int mods);
@@ -38,7 +40,8 @@ QDSPplot *qdspInit(const char *title) {
 
 	// we need to get the plot in the key hander
 	glfwSetWindowUserPointer(plot->window, plot);
-		
+
+	glfwSetWindowCloseCallback(plot->window, closeCallback);
 	glfwSetFramebufferSizeCallback(plot->window, resizeCallback);
 	glfwSetKeyCallback(plot->window, keyCallback);
 	
@@ -178,6 +181,9 @@ QDSPplot *qdspInit(const char *title) {
 	// transparency
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA); 
+
+	// default to 60 fps
+	qdspSetFramerate(plot, 60);
 	
 	// default bounds
 	qdspSetBounds(plot, -1.0f, 1.0f, -1.0f, 1.0f);
@@ -195,50 +201,24 @@ QDSPplot *qdspInit(const char *title) {
 	return plot;
 }
 
-void qdspSetBounds(QDSPplot *plot, double xMin, double xMax, double yMin, double yMax) {
-	glUseProgram(plot->pointsProgram);
-	glUniform1f(glGetUniformLocation(plot->pointsProgram, "xMin"), xMin);
-	glUniform1f(glGetUniformLocation(plot->pointsProgram, "xMax"), xMax);
-	glUniform1f(glGetUniformLocation(plot->pointsProgram, "yMin"), yMin);
-	glUniform1f(glGetUniformLocation(plot->pointsProgram, "yMax"), yMax);
-}
-
-void qdspSetPointColor(QDSPplot *plot, int rgb) {
-	glUseProgram(plot->pointsProgram);
-	glUniform1i(glGetUniformLocation(plot->pointsProgram, "defaultColor"), rgb);
-}
-
-void qdspSetBGColor(QDSPplot *plot, int rgb) {
-	glClearColor((0xff & rgb >> 16) / 255.0,
-	             (0xff & rgb >> 8) / 255.0,
-	             (0xff & rgb) / 255.0,
-	             1.0f);
+void qdspDelete(QDSPplot *plot) {
+	free(plot);
 }
 
 int qdspUpdate(QDSPplot *plot, double *x, double *y, int *color, int numVerts) {
-	// get ms since last full update (not last call)
-	struct timespec lastTime = plot->lastUpdate;
-	struct timespec newTime;
-	clock_gettime(CLOCK_MONOTONIC, &newTime);
-	double timeDiff = ((double)newTime.tv_sec*1.0e3 + newTime.tv_nsec*1.0e-6) - 
-		((double)lastTime.tv_sec*1.0e3 + lastTime.tv_nsec*1.0e-6);
+	// we just got updated
+	clock_gettime(CLOCK_MONOTONIC, &plot->lastUpdate);
 
 	while (plot->paused) {
 		glfwWaitEvents();
 	}
-	
-	// the rest of the function is a waste of time if no frame update is needed
-	if (timeDiff >= 16)
-		plot->lastUpdate = newTime;
-	else
-		return 2;
-
+		
 	// someone closed the window
 	if (glfwWindowShouldClose(plot->window)) {
 		glfwTerminate();
 		return 0;
 	}
-
+	
 	// copy all our vertex stuff
 	glUseProgram(plot->pointsProgram);
 
@@ -273,8 +253,64 @@ int qdspUpdate(QDSPplot *plot, double *x, double *y, int *color, int numVerts) {
 	return 1;
 }
 
-void qdspDelete(QDSPplot *plot) {
-	free(plot);
+int qdspUpdateIfReady(QDSPplot *plot, double *x, double *y, int *color, int numVerts) {
+	// get ms since last full update
+	struct timespec lastTime = plot->lastUpdate;
+	struct timespec newTime;
+	clock_gettime(CLOCK_MONOTONIC, &newTime);
+	double msDiff = ((double)newTime.tv_sec*1.0e3 + newTime.tv_nsec*1.0e-6) - 
+		((double)lastTime.tv_sec*1.0e3 + lastTime.tv_nsec*1.0e-6);
+	
+	if (msDiff >= plot->frameInterval)
+		return qdspUpdate(plot, x, y, color, numVerts);
+	else
+		return 2;
+}
+
+int qdspUpdateWait(QDSPplot *plot, double *x, double *y, int *color, int numVerts) {
+	// get ms since last full update
+	struct timespec lastTime = plot->lastUpdate;
+	struct timespec newTime;
+	clock_gettime(CLOCK_MONOTONIC, &newTime);
+	double msDiff = ((double)newTime.tv_sec*1.0e3 + newTime.tv_nsec*1.0e-6) -
+		((double)lastTime.tv_sec*1.0e3 + lastTime.tv_nsec*1.0e-6);
+
+	if (msDiff < plot->frameInterval)
+		glfwWaitEventsTimeout((plot->frameInterval - msDiff) / 1000);
+
+	return qdspUpdate(plot, x, y, color, numVerts);
+}
+
+void qdspSetFramerate(QDSPplot *plot, double framerate) {
+	if (framerate <= 0)
+		plot->frameInterval = 0;
+	else
+		plot->frameInterval = 1000.0 / framerate;
+}
+
+void qdspSetBounds(QDSPplot *plot, double xMin, double xMax, double yMin, double yMax) {
+	glUseProgram(plot->pointsProgram);
+	glUniform1f(glGetUniformLocation(plot->pointsProgram, "xMin"), xMin);
+	glUniform1f(glGetUniformLocation(plot->pointsProgram, "xMax"), xMax);
+	glUniform1f(glGetUniformLocation(plot->pointsProgram, "yMin"), yMin);
+	glUniform1f(glGetUniformLocation(plot->pointsProgram, "yMax"), yMax);
+}
+
+void qdspSetPointColor(QDSPplot *plot, int rgb) {
+	glUseProgram(plot->pointsProgram);
+	glUniform1i(glGetUniformLocation(plot->pointsProgram, "defaultColor"), rgb);
+}
+
+void qdspSetBGColor(QDSPplot *plot, int rgb) {
+	glClearColor((0xff & rgb >> 16) / 255.0,
+	             (0xff & rgb >> 8) / 255.0,
+	             (0xff & rgb) / 255.0,
+	             1.0f);
+}
+
+static void closeCallback(GLFWwindow *window) {
+	QDSPplot *plot = glfwGetWindowUserPointer(window);
+	plot->paused = 0;
 }
 
 static void resizeCallback(GLFWwindow *window, int width, int height) {

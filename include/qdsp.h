@@ -11,7 +11,7 @@ typedef struct QDSPplot {
 
 	// frame info
 	struct timespec lastUpdate;
-	struct timespec frameDelay;
+	double frameInterval;
 
 	// opengl stuff:
 	int pointsProgram;
@@ -33,9 +33,11 @@ void qdspDelete(QDSPplot *plot);
 
 int qdspUpdate(QDSPplot *plot, double *x, double *y, int *color, int numVerts);
 
-//int qdspUpdateIfReady(QDSPplot *plot, double *x, double *y, int *color, int numVerts);
+int qdspUpdateIfReady(QDSPplot *plot, double *x, double *y, int *color, int numVerts);
 
-//int qdspUpdateAndWait(QDSPplot *plot, double *x, double *y, int *color, int numVerts);
+int qdspUpdateWait(QDSPplot *plot, double *x, double *y, int *color, int numVerts);
+
+void qdspSetFramerate(QDSPplot *plot, double framerate);
 
 void qdspSetBounds(QDSPplot *plot, double xMin, double xMax, double yMin, double yMax);
 

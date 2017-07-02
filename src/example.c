@@ -95,8 +95,9 @@ int main(int argc, char **argv) {
 		// parameter 5: specifies the number of points to plot
 		//
 		// the function returns zero iff the window has closed
-
-		open = qdspUpdate(plot, x, v, color, PART_NUM);
+		// it returns 2 without doing anything if we update before a frame has passed
+		
+		open = qdspUpdateIfReady(plot, x, v, color, PART_NUM);
 
 		////////////////////////////////////////////////////////////
 		
