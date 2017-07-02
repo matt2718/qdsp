@@ -25,6 +25,9 @@ typedef struct QDSPplot {
 	unsigned int overlayVBO;
 	unsigned int overlayTexture;
 
+	// needed so we can redraw at will
+	int lastNumVerts;
+	
 } QDSPplot;
 
 QDSPplot *qdspInit(const char *title);

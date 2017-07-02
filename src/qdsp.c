@@ -234,6 +234,8 @@ int qdspUpdate(QDSPplot *plot, double *x, double *y, int *color, int numVerts) {
 	// should we use the default color?
 	glUniform1i(glGetUniformLocation(plot->pointsProgram, "useCustom"), color != NULL);
 
+	plot->lastNumVerts = numVerts;
+	
 	// drawing
 	glClear(GL_COLOR_BUFFER_BIT);
 	
@@ -341,6 +343,22 @@ static void keyCallback(GLFWwindow *window, int key, int code, int action, int m
 	// h - display help
 	if (key == GLFW_KEY_H && action == GLFW_PRESS) {
 		plot->overlay = !plot->overlay;
+
+		// if we don't draw here, the user can't toggle the overlay while paused
+		glClear(GL_COLOR_BUFFER_BIT);
+
+		glUseProgram(plot->pointsProgram);
+		glBindVertexArray(plot->pointsVAO);
+		glDrawArrays(GL_POINTS, 0, plot->lastNumVerts);
+
+		if (plot->overlay) {
+			glUseProgram(plot->overlayProgram);
+			glBindVertexArray(plot->overlayVAO);
+			glBindTexture(GL_TEXTURE_2D, plot->overlayTexture);
+			glDrawArrays(GL_TRIANGLES, 0, 6);
+		}
+	
+		glfwSwapBuffers(plot->window);
 	}
 }
 
