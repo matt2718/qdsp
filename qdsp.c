@@ -150,8 +150,15 @@ QDSPplot *qdspInit(const char *title) {
 	// load image with SOIL
 	int imgWidth, imgHeight;
 	unsigned char *imgData =
-		SOIL_load_image("helpmessage.png", &imgWidth, &imgHeight, NULL, SOIL_LOAD_RGB);
-	if (imgData == NULL) { // loading failed
+		SOIL_load_image("/usr/local/share/qdsp/helpmessage.png",
+		                &imgWidth, &imgHeight, NULL, SOIL_LOAD_RGB);
+
+	if (imgData == NULL)
+		// loading failed, try current dir
+		imgData = SOIL_load_image("helpmessage.png", &imgWidth, &imgHeight,
+		                          NULL, SOIL_LOAD_RGB);
+		
+	if (imgData == NULL) { // file is nowhere
 		fprintf(stderr, "Error loading image file helpmessage.png\n");
 		glfwTerminate();
 		free(plot);

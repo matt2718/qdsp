@@ -20,15 +20,16 @@ debug: EXAMPLE_CFLAGS += -g -O0
 
 .PHONY: clean
 clean:
+	rm -f helpmessage.png
 	rm -f libqdsp.so $(OBJECTS)
 	rm -f example
 
 .PHONY: install
-install: libqdsp.so qdsp.h
+install: libqdsp.so qdsp.h $(SHADERS) helpmessage.png
 	mkdir -p $(INSTPREFIX)/share/qdsp
 	cp libqdsp.so $(INSTPREFIX)/lib
 	cp qdsp.h $(INSTPREFIX)/include
-	cp $(SHADERS) $(INSTPREFIX)/share/qdsp
+	cp $(SHADERS) helpmessage.png $(INSTPREFIX)/share/qdsp
 	@echo "Installed successfully. You may need to run ldconfig."
 
 .PHONY: uninstall
