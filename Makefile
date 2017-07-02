@@ -1,7 +1,7 @@
 CC=gcc
 CFLAGS=-std=gnu99 -fPIC
 LDFLAGS=-shared
-LDLIBS=-lglfw -lSOIL
+LDLIBS=-lGL -lglfw -lSOIL
 EXAMPLE_CFLAGS=-std=gnu99 -fopenmp
 
 SOURCES=qdsp.c glad/glad.c
