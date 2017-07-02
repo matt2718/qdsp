@@ -1,17 +1,17 @@
 CC=gcc
 CFLAGS=-std=gnu99 -fPIC
 LDFLAGS=-shared
-LDLIBS=-lglfw
+LDLIBS=-lglfw -lSOIL
 EXAMPLE_CFLAGS=-std=gnu99 -fopenmp
 
 SOURCES=qdsp.c glad/glad.c
-SHADERS=vertex.glsl fragment.glsl
+SHADERS=vertex.glsl fragment.glsl overlay-vertex.glsl overlay-fragment.glsl
 OBJECTS=$(SOURCES:.c=.o)
 
 INSTPREFIX=/usr/local
 
 .PHONY: all
-all: libqdsp.so
+all: libqdsp.so helpmessage.png
 
 .PHONY: debug
 debug: libqdsp.so example
@@ -20,15 +20,16 @@ debug: EXAMPLE_CFLAGS += -g -O0
 
 .PHONY: clean
 clean:
+	rm -f helpmessage.png
 	rm -f libqdsp.so $(OBJECTS)
 	rm -f example
 
 .PHONY: install
-install: libqdsp.so qdsp.h
+install: libqdsp.so qdsp.h $(SHADERS) helpmessage.png
 	mkdir -p $(INSTPREFIX)/share/qdsp
 	cp libqdsp.so $(INSTPREFIX)/lib
 	cp qdsp.h $(INSTPREFIX)/include
-	cp fragment.glsl vertex.glsl $(INSTPREFIX)/share/qdsp
+	cp $(SHADERS) helpmessage.png $(INSTPREFIX)/share/qdsp
 	@echo "Installed successfully. You may need to run ldconfig."
 
 .PHONY: uninstall
@@ -47,6 +48,10 @@ libqdsp.so: $(OBJECTS)
 
 example: example.c libqdsp.so
 	$(CC) -o example $(EXAMPLE_CFLAGS) example.c libqdsp.so -lm -lfftw3 -Lqdsp -Wl,-R.
+
+helpmessage.png:
+	convert -size 400x400 xc:black -font "Ubuntu-Mono" -pointsize 16 \
+	-fill white -annotate +15+15 "$$(cat helpmessage)" helpmessage.png
 
 qdsp.o: qdsp.h glad/glad.h
 

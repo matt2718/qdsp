@@ -6,12 +6,20 @@
 typedef struct QDSPplot {
 	GLFWwindow *window;
 
+	int paused;
+	int overlay;
+
 	int shaderProgram;
 	unsigned int vertArrayObj;
 	unsigned int vertBufferObjX;
 	unsigned int vertBufferObjY;
 	unsigned int vertBufferObjCol;
 
+	int overShaderProgram;
+	unsigned int overVAO;
+	unsigned int overVBO;
+	unsigned int overTex;
+	
 	struct timespec lastTime;
 
 } QDSPplot;
