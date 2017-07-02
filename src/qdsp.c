@@ -190,7 +190,7 @@ QDSPplot *qdspInit(const char *title) {
 	plot->overlay = 0;
 	
 	// framerate stuff
-	clock_gettime(CLOCK_MONOTONIC, &plot->lastTime);
+	clock_gettime(CLOCK_MONOTONIC, &plot->lastUpdate);
 
 	return plot;
 }
@@ -217,7 +217,7 @@ void qdspSetBGColor(QDSPplot *plot, int rgb) {
 
 int qdspUpdate(QDSPplot *plot, double *x, double *y, int *color, int numVerts) {
 	// get ms since last full update (not last call)
-	struct timespec lastTime = plot->lastTime;
+	struct timespec lastTime = plot->lastUpdate;
 	struct timespec newTime;
 	clock_gettime(CLOCK_MONOTONIC, &newTime);
 	double timeDiff = ((double)newTime.tv_sec*1.0e3 + newTime.tv_nsec*1.0e-6) - 
@@ -229,7 +229,7 @@ int qdspUpdate(QDSPplot *plot, double *x, double *y, int *color, int numVerts) {
 	
 	// the rest of the function is a waste of time if no frame update is needed
 	if (timeDiff >= 16)
-		plot->lastTime = newTime;
+		plot->lastUpdate = newTime;
 	else
 		return 2;
 

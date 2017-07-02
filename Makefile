@@ -5,7 +5,7 @@ LDLIBS=-lGL -lglfw -lSOIL
 EXAMPLE_CFLAGS=-std=gnu99 -fopenmp -I./include
 
 SOURCES=qdsp.c glad.c
-SHADERS=vertex.glsl fragment.glsl overlay-vertex.glsl overlay-fragment.glsl
+SHADERS=points.vert.glsl points.frag.glsl overlay.vert.glsl overlay.frag.glsl
 OBJECTS=$(SOURCES:.c=.o)
 
 INSTPREFIX=/usr/local
