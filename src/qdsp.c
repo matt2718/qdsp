@@ -4,6 +4,7 @@
 #include <math.h>
 #include <time.h>
 #include <omp.h>
+#include <unistd.h>
 
 #include "glad/glad.h"
 #include <GLFW/glfw3.h>
@@ -152,7 +153,7 @@ QDSPplot *qdspInit(const char *title) {
 	// load image with SOIL
 	int imgWidth, imgHeight;
 	unsigned char *imgData =
-		SOIL_load_image("/usr/local/share/qdsp/helpmessage.png",
+		SOIL_load_image("/usr/local/share/qdsp/resources/helpmessage.png",
 		                &imgWidth, &imgHeight, NULL, SOIL_LOAD_RGB);
 
 	if (imgData == NULL)
@@ -278,7 +279,7 @@ int qdspUpdateWait(QDSPplot *plot, double *x, double *y, int *color, int numVert
 		((double)lastTime.tv_sec*1.0e3 + lastTime.tv_nsec*1.0e-6);
 
 	if (msDiff < plot->frameInterval)
-		glfwWaitEventsTimeout((plot->frameInterval - msDiff) / 1000);
+		usleep((plot->frameInterval - msDiff) * 1000);
 
 	return qdspUpdate(plot, x, y, color, numVerts);
 }
