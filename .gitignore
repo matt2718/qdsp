@@ -2,4 +2,4 @@
 *.so
 shaders.h
 example
-*.png
+images/*

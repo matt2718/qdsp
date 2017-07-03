@@ -12,13 +12,15 @@
 
 #include "qdsp.h"
 
-static int makeShader(const char *filename, GLenum type);
-
 static void closeCallback(GLFWwindow *window);
 
 static void resizeCallback(GLFWwindow *window, int width, int height);
 
 static void keyCallback(GLFWwindow *window, int key, int code, int action, int mods);
+
+static int makeShader(const char *filename, GLenum type);
+
+static void resourcePath(char *fullpath, const char *relpath);
 
 QDSPplot *qdspInit(const char *title) {
 	QDSPplot *plot = malloc(sizeof(QDSPplot));
@@ -57,12 +59,12 @@ QDSPplot *qdspInit(const char *title) {
 	// create shaders and link program
 
 	// for points
-	int pointsVert = makeShader("points.vert.glsl", GL_VERTEX_SHADER);
-	int pointsFrag = makeShader("points.frag.glsl", GL_FRAGMENT_SHADER);
+	int pointsVert = makeShader("shaders/points.vert.glsl", GL_VERTEX_SHADER);
+	int pointsFrag = makeShader("shaders/points.frag.glsl", GL_FRAGMENT_SHADER);
 
 	// for overlay
-	int overVert = makeShader("overlay.vert.glsl", GL_VERTEX_SHADER);
-	int overFrag = makeShader("overlay.frag.glsl", GL_FRAGMENT_SHADER);
+	int overVert = makeShader("shaders/overlay.vert.glsl", GL_VERTEX_SHADER);
+	int overFrag = makeShader("shaders/overlay.frag.glsl", GL_FRAGMENT_SHADER);
 	
 	if (pointsVert == 0 || pointsFrag == 0 || overVert == 0 || overFrag == 0) {
 		glfwTerminate();
@@ -152,17 +154,20 @@ QDSPplot *qdspInit(const char *title) {
 
 	// load image with SOIL
 	int imgWidth, imgHeight;
-	unsigned char *imgData =
-		SOIL_load_image("/usr/local/share/qdsp/resources/helpmessage.png",
-		                &imgWidth, &imgHeight, NULL, SOIL_LOAD_RGB);
 
+	char *imgRelPath = "images/helpmessage.png";
+	char imgPath[256];
+	resourcePath(imgPath, imgRelPath);
+	unsigned char *imgData = SOIL_load_image(imgPath, &imgWidth, &imgHeight,
+	                                         NULL, SOIL_LOAD_RGB);
 	if (imgData == NULL)
 		// loading failed, try current dir
-		imgData = SOIL_load_image("helpmessage.png", &imgWidth, &imgHeight,
+		imgData = SOIL_load_image(imgRelPath, &imgWidth, &imgHeight,
 		                          NULL, SOIL_LOAD_RGB);
 		
 	if (imgData == NULL) { // file is nowhere
-		fprintf(stderr, "Error loading image file helpmessage.png\n");
+		fprintf(stderr, "Could not find file: %s\n", imgPath);
+		fprintf(stderr, "Could not find file: %s\n", imgRelPath);
 		glfwTerminate();
 		free(plot);
 		return NULL;
@@ -365,20 +370,18 @@ static void keyCallback(GLFWwindow *window, int key, int code, int action, int m
 
 static int makeShader(const char *filename, GLenum type) {
 	// will fail with a crazy-long filename, but users can't call this anyway
-	char fullpath[256] = "/usr/local/share/qdsp/shaders/";
-	char localpath[256] = "./shaders/";
-	strcat(fullpath, filename);
+	char fullpath[256];
+	resourcePath(fullpath, filename);
 	FILE *file = fopen(fullpath, "r");
-
+	
 	// try current directory if it failed
 	if (file == NULL) {
-		strcat(localpath, filename);
-		file = fopen(localpath, "r");
+		file = fopen(filename, "r");
 	}
 	
 	if (file == NULL) {
 		fprintf(stderr, "Could not find file: %s\n", fullpath);
-		fprintf(stderr, "Could not find file: ./%s\n", localpath);
+		fprintf(stderr, "Could not find file: ./%s\n", filename);
 		return 0;
 	}
 
@@ -412,4 +415,15 @@ static int makeShader(const char *filename, GLenum type) {
 
 	free(buf);
 	return shader;
+}
+
+static void resourcePath(char *fullpath, const char *relpath) {
+#ifdef QDSP_RESOURCE_DIR
+	strcpy(fullpath, QDSP_RESOURCE_DIR);
+#else
+	// default when nothing specified
+	strcpy(fullpath, "/usr/local/share/qdsp/");
+#endif
+
+	strcat(fullpath, relpath);
 }
