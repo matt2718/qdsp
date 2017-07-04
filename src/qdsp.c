@@ -219,8 +219,7 @@ QDSPplot *qdspInit(const char *title) {
 	glUseProgram(plot->overlayProgram);
 	glUniform2f(glGetUniformLocation(plot->overlayProgram, "imgDims"),
 	            imgWidth, imgHeight);
-	resizeCallback(plot->window, 800, 600);
-	
+
 	// transparency
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA); 
@@ -237,6 +236,8 @@ QDSPplot *qdspInit(const char *title) {
 	
 	plot->paused = 0;
 	plot->overlay = 0;
+
+	resizeCallback(plot->window, 800, 600);
 	
 	// framerate stuff
 	clock_gettime(CLOCK_MONOTONIC, &plot->lastUpdate);
@@ -318,22 +319,22 @@ int qdspUpdateWait(QDSPplot *plot, double *x, double *y, int *color, int numPoin
 void qdspRedraw(QDSPplot *plot) {
 	glClear(GL_COLOR_BUFFER_BIT);
 
-	// points
-	glUseProgram(plot->pointsProgram);
-	glBindVertexArray(plot->pointsVAO);
-	glDrawArrays(GL_POINTS, 0, plot->numPoints);
-
 	// grid
 	glUseProgram(plot->gridProgram);
 
 	glUniform1i(glGetUniformLocation(plot->gridProgram, "useY"), 0);
 	glBindVertexArray(plot->gridVAOx);
 	glDrawArrays(GL_LINES, 0, 4 * plot->numGridX);
-	/*
+
 	glUniform1i(glGetUniformLocation(plot->gridProgram, "useY"), 1);
 	glBindVertexArray(plot->gridVAOy);
 	glDrawArrays(GL_LINES, 0, 4 * plot->numGridY);
-	*/
+
+	// points
+	glUseProgram(plot->pointsProgram);
+	glBindVertexArray(plot->pointsVAO);
+	glDrawArrays(GL_POINTS, 0, plot->numPoints);
+	
 	// help overlay
 	if (plot->overlay) {
 		glUseProgram(plot->overlayProgram);
@@ -422,8 +423,8 @@ void qdspSetGridY(QDSPplot *plot, double point, double interval, int rgb, double
 	
 	float *coords = malloc(4 * numLines * sizeof(float));
 	
-	for (int i = 0; i <= numLines; i++) {
-		double y = point + i * interval;
+	for (int i = 0; i < numLines; i++) {
+		double y = point + (iMin + i) * interval;
 		double yNorm = 2 * (y - plot->yMin) / (plot->yMax - plot->yMin) - 1;
 		coords[4*i + 0] = -1;
 		coords[4*i + 1] = yNorm;
@@ -460,6 +461,9 @@ static void resizeCallback(GLFWwindow *window, int width, int height) {
 	            width, height);
 	
 	glViewport(0, 0, width, height);
+
+	if (plot->paused)
+		qdspRedraw(plot);
 }
 
 static void keyCallback(GLFWwindow *window, int key, int code, int action, int mods) {
