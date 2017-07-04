@@ -22,7 +22,7 @@ debug: EXAMPLE_CFLAGS += -g -O0
 
 .PHONY: clean
 clean:
-	rm -f images
+	rm -rf images
 	rm -f libqdsp.so $(OBJECTS)
 	rm -f example
 
