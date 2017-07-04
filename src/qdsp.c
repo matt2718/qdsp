@@ -248,7 +248,7 @@ void qdspDelete(QDSPplot *plot) {
 	free(plot);
 }
 
-int qdspUpdate(QDSPplot *plot, double *x, double *y, int *color, int numVerts) {
+int qdspUpdate(QDSPplot *plot, double *x, double *y, int *color, int numPoints) {
 	// we just got updated
 	clock_gettime(CLOCK_MONOTONIC, &plot->lastUpdate);
 
@@ -266,26 +266,62 @@ int qdspUpdate(QDSPplot *plot, double *x, double *y, int *color, int numVerts) {
 	glUseProgram(plot->pointsProgram);
 
 	glBindBuffer(GL_ARRAY_BUFFER, plot->pointsVBOx);
-	glBufferData(GL_ARRAY_BUFFER, numVerts * sizeof(double), x, GL_STREAM_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, numPoints * sizeof(double), x, GL_STREAM_DRAW);
 
 	glBindBuffer(GL_ARRAY_BUFFER, plot->pointsVBOy);
-	glBufferData(GL_ARRAY_BUFFER, numVerts * sizeof(double), y, GL_STREAM_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, numPoints * sizeof(double), y, GL_STREAM_DRAW);
 
 	glBindBuffer(GL_ARRAY_BUFFER, plot->pointsVBOrgb);
-	glBufferData(GL_ARRAY_BUFFER, numVerts * sizeof(int), color, GL_STREAM_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, numPoints * sizeof(int), color, GL_STREAM_DRAW);
 
 	// should we use the default color?
 	glUniform1i(glGetUniformLocation(plot->pointsProgram, "useCustom"), color != NULL);
 
-	plot->numVerts = numVerts;
+	plot->numPoints = numPoints;
 	
 	// drawing:
+	qdspRedraw(plot);
+	
+	glfwPollEvents();
 
+	return 1;
+}
+
+int qdspUpdateIfReady(QDSPplot *plot, double *x, double *y, int *color, int numPoints) {
+	// get ms since last full update
+	struct timespec lastTime = plot->lastUpdate;
+	struct timespec newTime;
+	clock_gettime(CLOCK_MONOTONIC, &newTime);
+	double msDiff = ((double)newTime.tv_sec*1.0e3 + newTime.tv_nsec*1.0e-6) - 
+		((double)lastTime.tv_sec*1.0e3 + lastTime.tv_nsec*1.0e-6);
+	
+	if (msDiff >= plot->frameInterval)
+		return qdspUpdate(plot, x, y, color, numPoints);
+	else
+		return 2;
+}
+
+int qdspUpdateWait(QDSPplot *plot, double *x, double *y, int *color, int numPoints) {
+	// get ms since last full update
+	struct timespec lastTime = plot->lastUpdate;
+	struct timespec newTime;
+	clock_gettime(CLOCK_MONOTONIC, &newTime);
+	double msDiff = ((double)newTime.tv_sec*1.0e3 + newTime.tv_nsec*1.0e-6) -
+		((double)lastTime.tv_sec*1.0e3 + lastTime.tv_nsec*1.0e-6);
+
+	if (msDiff < plot->frameInterval)
+		usleep((plot->frameInterval - msDiff) * 1000);
+
+	return qdspUpdate(plot, x, y, color, numPoints);
+}
+
+void qdspRedraw(QDSPplot *plot) {
 	glClear(GL_COLOR_BUFFER_BIT);
 
 	// points
+	glUseProgram(plot->pointsProgram);
 	glBindVertexArray(plot->pointsVAO);
-	glDrawArrays(GL_POINTS, 0, numVerts);
+	glDrawArrays(GL_POINTS, 0, plot->numPoints);
 
 	// grid
 	glUseProgram(plot->gridProgram);
@@ -307,37 +343,6 @@ int qdspUpdate(QDSPplot *plot, double *x, double *y, int *color, int numVerts) {
 	}
 	
 	glfwSwapBuffers(plot->window);
-	glfwPollEvents();
-
-	return 1;
-}
-
-int qdspUpdateIfReady(QDSPplot *plot, double *x, double *y, int *color, int numVerts) {
-	// get ms since last full update
-	struct timespec lastTime = plot->lastUpdate;
-	struct timespec newTime;
-	clock_gettime(CLOCK_MONOTONIC, &newTime);
-	double msDiff = ((double)newTime.tv_sec*1.0e3 + newTime.tv_nsec*1.0e-6) - 
-		((double)lastTime.tv_sec*1.0e3 + lastTime.tv_nsec*1.0e-6);
-	
-	if (msDiff >= plot->frameInterval)
-		return qdspUpdate(plot, x, y, color, numVerts);
-	else
-		return 2;
-}
-
-int qdspUpdateWait(QDSPplot *plot, double *x, double *y, int *color, int numVerts) {
-	// get ms since last full update
-	struct timespec lastTime = plot->lastUpdate;
-	struct timespec newTime;
-	clock_gettime(CLOCK_MONOTONIC, &newTime);
-	double msDiff = ((double)newTime.tv_sec*1.0e3 + newTime.tv_nsec*1.0e-6) -
-		((double)lastTime.tv_sec*1.0e3 + lastTime.tv_nsec*1.0e-6);
-
-	if (msDiff < plot->frameInterval)
-		usleep((plot->frameInterval - msDiff) * 1000);
-
-	return qdspUpdate(plot, x, y, color, numVerts);
 }
 
 void qdspSetFramerate(QDSPplot *plot, double framerate) {
@@ -477,21 +482,8 @@ static void keyCallback(GLFWwindow *window, int key, int code, int action, int m
 	if (key == GLFW_KEY_H && action == GLFW_PRESS) {
 		plot->overlay = !plot->overlay;
 
-		// if we don't draw here, the user can't toggle the overlay while paused
-		glClear(GL_COLOR_BUFFER_BIT);
-
-		glUseProgram(plot->pointsProgram);
-		glBindVertexArray(plot->pointsVAO);
-		glDrawArrays(GL_POINTS, 0, plot->numVerts);
-
-		if (plot->overlay) {
-			glUseProgram(plot->overlayProgram);
-			glBindVertexArray(plot->overlayVAO);
-			glBindTexture(GL_TEXTURE_2D, plot->overlayTexture);
-			glDrawArrays(GL_TRIANGLES, 0, 6);
-		}
-	
-		glfwSwapBuffers(plot->window);
+		// redraw so the user can toggle the overlay while paused
+		qdspRedraw(plot);
 	}
 }
 

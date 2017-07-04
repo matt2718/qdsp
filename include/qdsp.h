@@ -36,7 +36,7 @@ typedef struct QDSPplot {
 	unsigned int overlayTexture;
 
 	// needed so we can redraw at will
-	int numVerts;
+	int numPoints;
 	int numGridX;
 	int numGridY;
 	
@@ -46,11 +46,13 @@ QDSPplot *qdspInit(const char *title);
 
 void qdspDelete(QDSPplot *plot);
 
-int qdspUpdate(QDSPplot *plot, double *x, double *y, int *color, int numVerts);
+int qdspUpdate(QDSPplot *plot, double *x, double *y, int *color, int numPoints);
 
-int qdspUpdateIfReady(QDSPplot *plot, double *x, double *y, int *color, int numVerts);
+int qdspUpdateIfReady(QDSPplot *plot, double *x, double *y, int *color, int numPoints);
 
-int qdspUpdateWait(QDSPplot *plot, double *x, double *y, int *color, int numVerts);
+int qdspUpdateWait(QDSPplot *plot, double *x, double *y, int *color, int numPoints);
+
+void qdspRedraw(QDSPplot *plot);
 
 void qdspSetFramerate(QDSPplot *plot, double framerate);
 
