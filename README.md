@@ -10,18 +10,21 @@ QDSP is still in early development, and should not be considered stable under an
 
 So far, QDSP is only ported to Linux. There's a good chance that it will work on Mac, but I haven't tested it. At some point in the near future, I'll redo the build system in CMake and make sure it runs on everything.
 
-QDSP's only dependency is GLFW 3.
+QDSP requires the following dependencies, which should be available in most package repositories:
+
+* [GLFW 3](http://www.glfw.org/docs/latest/)
+* [SOIL](http://www.lonesock.net/soil.html)
 
 To install, just run:
 
     $ make
     $ sudo make install
-	$ sudo ldconfig
+    $ sudo ldconfig
 
 After building, this will install the shared library to `/usr/local/lib` and the header to `/usr/local/include`. You may need to add `/usr/local/lib` to your system's ldconfig path.
 
 ## Usage
 
-As of now, I have not written any documentation. This will change very soon. Check the file `example.c` for a basic example of a PIC simulation with QDSP (run `make example` after installing the library if you want to try it out).
+Just put `#include <qdsp.h>` in your code and link with -lqdsp.
 
-Remember to `#include <qdsp.h>`
+As of now, I have not written any documentation. This will change very soon. Check the file `src/example.c` for a basic example of a phase plot with QDSP (run `make example` if you want to try it out). It uses QDSP to render the phase plot of a 1D PIC simulation.

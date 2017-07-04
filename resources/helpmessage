@@ -1,0 +1,5 @@
+KEYBINDINGS:
+  g - Toggle grid
+  h - Toggle this help message
+  p - Pause/resume
+  q - Exit

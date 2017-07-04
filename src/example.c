@@ -5,7 +5,7 @@
 #include <fftw3.h>
 #include <omp.h>
 
-#include <qdsp.h>
+#include "qdsp.h"
 
 const double XMAX = 16.0; // system length
 const int NGRID = 256; // grid size
@@ -65,6 +65,15 @@ int main(int argc, char **argv) {
 	// set x and y bounds. parameters are xmin, xmax, ymin, ymax
 	qdspSetBounds(plot, 0, XMAX, -30, 30);
 
+	// set grid dimensions
+	// parameters are:
+	//   point where 1 grid line is
+	//   interval between grid lines
+	//   grid color
+	// grid lines can be toggled by pressing 'g'
+	qdspSetGridX(plot, 0, 4, 0x000000);
+	qdspSetGridY(plot, 0, 5, 0x000000);
+	
 	// default point color and background color. pretty self-explanatory
 	// the first one won't be used if we specify a color array when updating
 	qdspSetPointColor(plot, 0x000000);
@@ -95,8 +104,9 @@ int main(int argc, char **argv) {
 		// parameter 5: specifies the number of points to plot
 		//
 		// the function returns zero iff the window has closed
-
-		open = qdspUpdate(plot, x, v, color, PART_NUM);
+		// it returns 2 without doing anything if we update before a frame has passed
+		
+		open = qdspUpdateIfReady(plot, x, v, color, PART_NUM);
 
 		////////////////////////////////////////////////////////////
 		
