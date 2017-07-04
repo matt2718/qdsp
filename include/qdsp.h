@@ -8,6 +8,9 @@ typedef struct QDSPplot {
 
 	int paused;
 	int overlay;
+	int grid;
+
+	int xAutoGrid, yAutoGrid;
 
 	// frame info
 	struct timespec lastUpdate;
@@ -62,8 +65,8 @@ void qdspSetPointColor(QDSPplot *plot, int rgb);
 
 void qdspSetBGColor(QDSPplot *plot, int rgb);
 
-void qdspSetGridX(QDSPplot *plot, double point, double interval, int rgb, double alpha);
+void qdspSetGridX(QDSPplot *plot, double point, double interval, int rgb);
 
-void qdspSetGridY(QDSPplot *plot, double point, double interval, int rgb, double alpha);
+void qdspSetGridY(QDSPplot *plot, double point, double interval, int rgb);
 
 #endif

@@ -236,6 +236,10 @@ QDSPplot *qdspInit(const char *title) {
 	
 	plot->paused = 0;
 	plot->overlay = 0;
+	plot->grid = 0;
+
+	plot->xAutoGrid = 1;
+	plot->yAutoGrid = 1;
 
 	resizeCallback(plot->window, 800, 600);
 	
@@ -320,16 +324,18 @@ void qdspRedraw(QDSPplot *plot) {
 	glClear(GL_COLOR_BUFFER_BIT);
 
 	// grid
-	glUseProgram(plot->gridProgram);
+	if (plot->grid) {
+		glUseProgram(plot->gridProgram);
 
-	glUniform1i(glGetUniformLocation(plot->gridProgram, "useY"), 0);
-	glBindVertexArray(plot->gridVAOx);
-	glDrawArrays(GL_LINES, 0, 4 * plot->numGridX);
+		glUniform1i(glGetUniformLocation(plot->gridProgram, "useY"), 0);
+		glBindVertexArray(plot->gridVAOx);
+		glDrawArrays(GL_LINES, 0, 4 * plot->numGridX);
 
-	glUniform1i(glGetUniformLocation(plot->gridProgram, "useY"), 1);
-	glBindVertexArray(plot->gridVAOy);
-	glDrawArrays(GL_LINES, 0, 4 * plot->numGridY);
-
+		glUniform1i(glGetUniformLocation(plot->gridProgram, "useY"), 1);
+		glBindVertexArray(plot->gridVAOy);
+		glDrawArrays(GL_LINES, 0, 4 * plot->numGridY);
+	}
+	
 	// points
 	glUseProgram(plot->pointsProgram);
 	glBindVertexArray(plot->pointsVAO);
@@ -363,6 +369,13 @@ void qdspSetBounds(QDSPplot *plot, double xMin, double xMax, double yMin, double
 	plot->xMax = xMax;
 	plot->yMin = yMin;
 	plot->yMax = yMax;
+
+	// if no grid has been set, we need to make sure it doesn't look like crap
+	if (plot->xAutoGrid)
+		qdspSetGridX(plot, xMin, (xMax - xMin) / 4, 0x000000);
+
+	if (plot->yAutoGrid)
+		qdspSetGridY(plot, yMin, (yMax - yMin) / 4, 0x000000);
 }
 
 void qdspSetPointColor(QDSPplot *plot, int rgb) {
@@ -377,8 +390,10 @@ void qdspSetBGColor(QDSPplot *plot, int rgb) {
 	             1.0f);
 }
 
-void qdspSetGridX(QDSPplot *plot, double point, double interval, int rgb, double alpha) {
+void qdspSetGridX(QDSPplot *plot, double point, double interval, int rgb) {
 	if (interval <= 0) return;
+
+	plot->xAutoGrid = 0;
 	
 	int iMin = (int)ceil((plot->xMin - point) / interval);
 	int iMax = (int)floor((plot->xMax - point) / interval);
@@ -413,9 +428,11 @@ void qdspSetGridX(QDSPplot *plot, double point, double interval, int rgb, double
 	free(coords);
 }
 
-void qdspSetGridY(QDSPplot *plot, double point, double interval, int rgb, double alpha) {
+void qdspSetGridY(QDSPplot *plot, double point, double interval, int rgb) {
 	if (interval <= 0) return;
-	
+
+	plot->yAutoGrid = 0;
+
 	int iMin = (int)ceil((plot->yMin - point) / interval);
 	int iMax = (int)floor((plot->yMax - point) / interval);
 	int numLines = (iMax - iMin + 1);
@@ -487,6 +504,12 @@ static void keyCallback(GLFWwindow *window, int key, int code, int action, int m
 		plot->overlay = !plot->overlay;
 
 		// redraw so the user can toggle the overlay while paused
+		qdspRedraw(plot);
+	}
+
+	// g - toggle grid
+	if (key == GLFW_KEY_G && action == GLFW_PRESS) {
+		plot->grid = !plot->grid;
 		qdspRedraw(plot);
 	}
 }
