@@ -62,11 +62,19 @@ QDSPplot *qdspInit(const char *title) {
 	int pointsVert = makeShader("shaders/points.vert.glsl", GL_VERTEX_SHADER);
 	int pointsFrag = makeShader("shaders/points.frag.glsl", GL_FRAGMENT_SHADER);
 
+	// for grid
+	int gridVert = makeShader("shaders/grid.vert.glsl", GL_VERTEX_SHADER);
+	int gridFrag = makeShader("shaders/grid.frag.glsl", GL_FRAGMENT_SHADER);
+
 	// for overlay
 	int overVert = makeShader("shaders/overlay.vert.glsl", GL_VERTEX_SHADER);
 	int overFrag = makeShader("shaders/overlay.frag.glsl", GL_FRAGMENT_SHADER);
-	
-	if (pointsVert == 0 || pointsFrag == 0 || overVert == 0 || overFrag == 0) {
+
+	// shader creation failed
+	if (pointsVert == 0 || pointsFrag == 0 ||
+	    overVert == 0 || overFrag == 0 ||
+	    overVert == 0 || overFrag == 0) {
+		
 		glfwTerminate();
 		free(plot);
 		return NULL;
@@ -77,15 +85,21 @@ QDSPplot *qdspInit(const char *title) {
 	glAttachShader(plot->pointsProgram, pointsFrag);
 	glLinkProgram(plot->pointsProgram);
 
+	plot->gridProgram = glCreateProgram();
+	glAttachShader(plot->gridProgram, gridVert);
+	glAttachShader(plot->gridProgram, gridFrag);
+	glLinkProgram(plot->gridProgram);
+	
 	plot->overlayProgram = glCreateProgram();
 	glAttachShader(plot->overlayProgram, overVert);
 	glAttachShader(plot->overlayProgram, overFrag);
 	glLinkProgram(plot->overlayProgram);
 
-	int pointSuccess, overSuccess;
+	int pointSuccess, gridSuccess, overSuccess;
 	glGetProgramiv(plot->pointsProgram, GL_LINK_STATUS, &pointSuccess);
+	glGetProgramiv(plot->gridProgram, GL_LINK_STATUS, &gridSuccess);
 	glGetProgramiv(plot->overlayProgram, GL_LINK_STATUS, &overSuccess);
-	if (!pointSuccess || !overSuccess) {
+	if (!pointSuccess || !gridSuccess || !overSuccess) {
 		char log[1024];
 		glGetProgramInfoLog(plot->pointsProgram, 1024, NULL, log);
 		fprintf(stderr, "Error linking program\n");
@@ -97,6 +111,8 @@ QDSPplot *qdspInit(const char *title) {
 
 	glDeleteShader(pointsVert);
 	glDeleteShader(pointsFrag);
+	glDeleteShader(gridVert);
+	glDeleteShader(gridFrag);
 	glDeleteShader(overVert);
 	glDeleteShader(overFrag);
 
@@ -120,6 +136,26 @@ QDSPplot *qdspInit(const char *title) {
 	glVertexAttribIPointer(2, 1, GL_INT, 0, NULL);
 	glEnableVertexAttribArray(2);
 
+	// buffer setup for x grid
+	glGenVertexArrays(1, &plot->gridVAOx);
+	glGenBuffers(1, &plot->gridVBOx);
+
+	glBindVertexArray(plot->gridVAOx);
+
+	glBindBuffer(GL_ARRAY_BUFFER, plot->gridVBOx);
+	glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), NULL);
+	glEnableVertexAttribArray(0);
+
+	// buffer setup for y grid
+	glGenVertexArrays(1, &plot->gridVAOy);
+	glGenBuffers(1, &plot->gridVBOy);
+
+	glBindVertexArray(plot->gridVAOy);
+
+	glBindBuffer(GL_ARRAY_BUFFER, plot->gridVBOy);
+	glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), NULL);
+	glEnableVertexAttribArray(0);
+	
 	// buffer setup for overlay
 	glGenVertexArrays(1, &plot->overlayVAO);
 	glGenBuffers(1, &plot->overlayVBO);
@@ -158,6 +194,7 @@ QDSPplot *qdspInit(const char *title) {
 	char *imgRelPath = "images/helpmessage.png";
 	char imgPath[256];
 	resourcePath(imgPath, imgRelPath);
+
 	unsigned char *imgData = SOIL_load_image(imgPath, &imgWidth, &imgHeight,
 	                                         NULL, SOIL_LOAD_RGB);
 	if (imgData == NULL)
@@ -197,7 +234,7 @@ QDSPplot *qdspInit(const char *title) {
 	// default colors: yellow points, black background
 	qdspSetPointColor(plot, 0xffff33);
 	qdspSetBGColor(plot, 0x000000);
-
+	
 	plot->paused = 0;
 	plot->overlay = 0;
 	
@@ -240,14 +277,28 @@ int qdspUpdate(QDSPplot *plot, double *x, double *y, int *color, int numVerts) {
 	// should we use the default color?
 	glUniform1i(glGetUniformLocation(plot->pointsProgram, "useCustom"), color != NULL);
 
-	plot->lastNumVerts = numVerts;
+	plot->numVerts = numVerts;
 	
-	// drawing
+	// drawing:
+
 	glClear(GL_COLOR_BUFFER_BIT);
-	
+
+	// points
 	glBindVertexArray(plot->pointsVAO);
 	glDrawArrays(GL_POINTS, 0, numVerts);
 
+	// grid
+	glUseProgram(plot->gridProgram);
+
+	glUniform1i(glGetUniformLocation(plot->gridProgram, "useY"), 0);
+	glBindVertexArray(plot->gridVAOx);
+	glDrawArrays(GL_LINES, 0, 4 * plot->numGridX);
+	/*
+	glUniform1i(glGetUniformLocation(plot->gridProgram, "useY"), 1);
+	glBindVertexArray(plot->gridVAOy);
+	glDrawArrays(GL_LINES, 0, 4 * plot->numGridY);
+	*/
+	// help overlay
 	if (plot->overlay) {
 		glUseProgram(plot->overlayProgram);
 		glBindVertexArray(plot->overlayVAO);
@@ -302,6 +353,10 @@ void qdspSetBounds(QDSPplot *plot, double xMin, double xMax, double yMin, double
 	glUniform1f(glGetUniformLocation(plot->pointsProgram, "xMax"), xMax);
 	glUniform1f(glGetUniformLocation(plot->pointsProgram, "yMin"), yMin);
 	glUniform1f(glGetUniformLocation(plot->pointsProgram, "yMax"), yMax);
+	plot->xMin = xMin;
+	plot->xMax = xMax;
+	plot->yMin = yMin;
+	plot->yMax = yMax;
 }
 
 void qdspSetPointColor(QDSPplot *plot, int rgb) {
@@ -314,6 +369,78 @@ void qdspSetBGColor(QDSPplot *plot, int rgb) {
 	             (0xff & rgb >> 8) / 255.0,
 	             (0xff & rgb) / 255.0,
 	             1.0f);
+}
+
+void qdspSetGridX(QDSPplot *plot, double point, double interval, int rgb, double alpha) {
+	if (interval <= 0) return;
+	
+	int iMin = (int)ceil((plot->xMin - point) / interval);
+	int iMax = (int)floor((plot->xMax - point) / interval);
+	int numLines = (iMax - iMin + 1);
+	plot->numGridX = numLines;
+	
+	float *coords = malloc(4 * numLines * sizeof(float));
+	
+	for (int i = 0; i < numLines; i++) {
+		double x = point + (iMin + i) * interval;
+		double xNorm = 2 * (x - plot->xMin) / (plot->xMax - plot->xMin) - 1;
+		coords[4*i + 0] = xNorm;
+		coords[4*i + 1] = -1;
+		coords[4*i + 2] = xNorm;
+		coords[4*i + 3] = 1;
+	}
+
+	glUseProgram(plot->gridProgram);
+	
+	// pass x,y
+	glBindVertexArray(plot->gridVAOx);
+	glBindBuffer(GL_ARRAY_BUFFER, plot->gridVBOx);
+	glBufferData(GL_ARRAY_BUFFER, 4 * numLines * sizeof(float), coords, GL_STATIC_DRAW);
+
+	// pass rgba
+	glUniform4f(glGetUniformLocation(plot->gridProgram, "xColor"),
+	            (0xff & rgb >> 16) / 255.0,
+	            (0xff & rgb >> 8) / 255.0,
+	            (0xff & rgb) / 255.0,
+	            1.0f);
+	
+	free(coords);
+}
+
+void qdspSetGridY(QDSPplot *plot, double point, double interval, int rgb, double alpha) {
+	if (interval <= 0) return;
+	
+	int iMin = (int)ceil((plot->yMin - point) / interval);
+	int iMax = (int)floor((plot->yMax - point) / interval);
+	int numLines = (iMax - iMin + 1);
+	plot->numGridY = numLines;
+	
+	float *coords = malloc(4 * numLines * sizeof(float));
+	
+	for (int i = 0; i <= numLines; i++) {
+		double y = point + i * interval;
+		double yNorm = 2 * (y - plot->yMin) / (plot->yMax - plot->yMin) - 1;
+		coords[4*i + 0] = -1;
+		coords[4*i + 1] = yNorm;
+		coords[4*i + 2] = 1;
+		coords[4*i + 3] = yNorm;
+	}
+
+	glUseProgram(plot->gridProgram);
+	
+	// pass x,y
+	glBindVertexArray(plot->gridVAOy);
+	glBindBuffer(GL_ARRAY_BUFFER, plot->gridVBOy);
+	glBufferData(GL_ARRAY_BUFFER, 4 * numLines * sizeof(float), coords, GL_STATIC_DRAW);
+
+	// pass rgba
+	glUniform4f(glGetUniformLocation(plot->gridProgram, "yColor"),
+	            (0xff & rgb >> 16) / 255.0,
+	            (0xff & rgb >> 8) / 255.0,
+	            (0xff & rgb) / 255.0,
+	            1.0f);	
+	
+	free(coords);	
 }
 
 static void closeCallback(GLFWwindow *window) {
@@ -355,7 +482,7 @@ static void keyCallback(GLFWwindow *window, int key, int code, int action, int m
 
 		glUseProgram(plot->pointsProgram);
 		glBindVertexArray(plot->pointsVAO);
-		glDrawArrays(GL_POINTS, 0, plot->lastNumVerts);
+		glDrawArrays(GL_POINTS, 0, plot->numVerts);
 
 		if (plot->overlay) {
 			glUseProgram(plot->overlayProgram);

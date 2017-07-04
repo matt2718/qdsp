@@ -65,6 +65,9 @@ int main(int argc, char **argv) {
 	// set x and y bounds. parameters are xmin, xmax, ymin, ymax
 	qdspSetBounds(plot, 0, XMAX, -30, 30);
 
+	qdspSetGridX(plot, 0, 4, 0x008800, 0.5);
+	//qdspSetGridY(plot, 0, 5, 0x008800, 0.5);
+	
 	// default point color and background color. pretty self-explanatory
 	// the first one won't be used if we specify a color array when updating
 	qdspSetPointColor(plot, 0x000000);

@@ -13,6 +13,10 @@ typedef struct QDSPplot {
 	struct timespec lastUpdate;
 	double frameInterval;
 
+	// bounds, we could probably use glGetUniform, but storing them is easier
+	double xMin, xMax;
+	double yMin, yMax;
+	
 	// opengl stuff:
 	int pointsProgram;
 	unsigned int pointsVAO;
@@ -20,13 +24,21 @@ typedef struct QDSPplot {
 	unsigned int pointsVBOy;
 	unsigned int pointsVBOrgb;
 
+	int gridProgram;
+	unsigned int gridVAOx;
+	unsigned int gridVBOx;
+	unsigned int gridVAOy;
+	unsigned int gridVBOy;
+
 	int overlayProgram;
 	unsigned int overlayVAO;
 	unsigned int overlayVBO;
 	unsigned int overlayTexture;
 
 	// needed so we can redraw at will
-	int lastNumVerts;
+	int numVerts;
+	int numGridX;
+	int numGridY;
 	
 } QDSPplot;
 
@@ -47,5 +59,9 @@ void qdspSetBounds(QDSPplot *plot, double xMin, double xMax, double yMin, double
 void qdspSetPointColor(QDSPplot *plot, int rgb);
 
 void qdspSetBGColor(QDSPplot *plot, int rgb);
+
+void qdspSetGridX(QDSPplot *plot, double point, double interval, int rgb, double alpha);
+
+void qdspSetGridY(QDSPplot *plot, double point, double interval, int rgb, double alpha);
 
 #endif
