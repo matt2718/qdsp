@@ -33,6 +33,7 @@ QDSPplot *qdspInit(const char *title) {
 	
 	// make window, basic config
 	plot->window = glfwCreateWindow(800, 600, title, NULL, NULL);
+
 	if (plot->window == NULL) {
 		fprintf(stderr, "Couldn't create window\n");
 		glfwTerminate();
@@ -254,6 +255,7 @@ void qdspDelete(QDSPplot *plot) {
 }
 
 int qdspUpdate(QDSPplot *plot, double *x, double *y, int *color, int numPoints) {
+	glfwMakeContextCurrent(plot->window);
 	// we just got updated
 	clock_gettime(CLOCK_MONOTONIC, &plot->lastUpdate);
 
@@ -263,7 +265,7 @@ int qdspUpdate(QDSPplot *plot, double *x, double *y, int *color, int numPoints) 
 		
 	// someone closed the window
 	if (glfwWindowShouldClose(plot->window)) {
-		glfwTerminate();
+		glfwDestroyWindow(plot->window);
 		return 0;
 	}
 	
@@ -321,6 +323,8 @@ int qdspUpdateWait(QDSPplot *plot, double *x, double *y, int *color, int numPoin
 }
 
 void qdspRedraw(QDSPplot *plot) {
+	glfwMakeContextCurrent(plot->window);
+	
 	glClear(GL_COLOR_BUFFER_BIT);
 
 	// grid
@@ -360,6 +364,8 @@ void qdspSetFramerate(QDSPplot *plot, double framerate) {
 }
 
 void qdspSetBounds(QDSPplot *plot, double xMin, double xMax, double yMin, double yMax) {
+	glfwMakeContextCurrent(plot->window);
+	
 	glUseProgram(plot->pointsProgram);
 	glUniform1f(glGetUniformLocation(plot->pointsProgram, "xMin"), xMin);
 	glUniform1f(glGetUniformLocation(plot->pointsProgram, "xMax"), xMax);
@@ -379,11 +385,15 @@ void qdspSetBounds(QDSPplot *plot, double xMin, double xMax, double yMin, double
 }
 
 void qdspSetPointColor(QDSPplot *plot, int rgb) {
+	glfwMakeContextCurrent(plot->window);
+	
 	glUseProgram(plot->pointsProgram);
 	glUniform1i(glGetUniformLocation(plot->pointsProgram, "defaultColor"), rgb);
 }
 
 void qdspSetBGColor(QDSPplot *plot, int rgb) {
+	glfwMakeContextCurrent(plot->window);
+
 	glClearColor((0xff & rgb >> 16) / 255.0,
 	             (0xff & rgb >> 8) / 255.0,
 	             (0xff & rgb) / 255.0,
@@ -391,6 +401,8 @@ void qdspSetBGColor(QDSPplot *plot, int rgb) {
 }
 
 void qdspSetGridX(QDSPplot *plot, double point, double interval, int rgb) {
+	glfwMakeContextCurrent(plot->window);
+	
 	if (interval <= 0) return;
 
 	plot->xAutoGrid = 0;
@@ -429,6 +441,8 @@ void qdspSetGridX(QDSPplot *plot, double point, double interval, int rgb) {
 }
 
 void qdspSetGridY(QDSPplot *plot, double point, double interval, int rgb) {
+	glfwMakeContextCurrent(plot->window);
+	
 	if (interval <= 0) return;
 
 	plot->yAutoGrid = 0;
@@ -473,6 +487,8 @@ static void closeCallback(GLFWwindow *window) {
 
 static void resizeCallback(GLFWwindow *window, int width, int height) {
 	QDSPplot *plot = glfwGetWindowUserPointer(window);
+	glfwMakeContextCurrent(window);
+	
 	glUseProgram(plot->overlayProgram);
 	glUniform2f(glGetUniformLocation(plot->overlayProgram, "pixDims"),
 	            width, height);
@@ -485,7 +501,7 @@ static void resizeCallback(GLFWwindow *window, int width, int height) {
 
 static void keyCallback(GLFWwindow *window, int key, int code, int action, int mods) {
 	QDSPplot *plot = glfwGetWindowUserPointer(window);
-	
+	glfwMakeContextCurrent(window);
 	// ESC - close
 	// q - close
 	if ((key == GLFW_KEY_ESCAPE || key == GLFW_KEY_Q)
