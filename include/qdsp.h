@@ -19,7 +19,7 @@ typedef struct QDSPplot {
 	// bounds, we could probably use glGetUniform, but storing them is easier
 	double xMin, xMax;
 	double yMin, yMax;
-	
+
 	// opengl stuff:
 	int pointsProgram;
 	unsigned int pointsVAO;
@@ -33,6 +33,12 @@ typedef struct QDSPplot {
 	unsigned int gridVAOy;
 	unsigned int gridVBOy;
 
+	int textProgram;
+	unsigned int textVAOx;
+	unsigned int textVBOx;
+	unsigned int textVAOy;
+	unsigned int textVBOy;
+
 	int overlayProgram;
 	unsigned int overlayVAO;
 	unsigned int overlayVBO;
@@ -42,7 +48,7 @@ typedef struct QDSPplot {
 	int numPoints;
 	int numGridX;
 	int numGridY;
-	
+
 } QDSPplot;
 
 QDSPplot *qdspInit(const char *title);

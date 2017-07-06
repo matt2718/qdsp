@@ -30,7 +30,7 @@ QDSPplot *qdspInit(const char *title) {
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-	
+
 	// make window, basic config
 	plot->window = glfwCreateWindow(800, 600, title, NULL, NULL);
 	if (plot->window == NULL) {
@@ -47,7 +47,7 @@ QDSPplot *qdspInit(const char *title) {
 	glfwSetWindowCloseCallback(plot->window, closeCallback);
 	glfwSetFramebufferSizeCallback(plot->window, resizeCallback);
 	glfwSetKeyCallback(plot->window, keyCallback);
-	
+
 	// load extensions via GLAD
 	if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) {
 		fprintf(stderr, "Couldn't initialize GLAD\n");
@@ -66,15 +66,17 @@ QDSPplot *qdspInit(const char *title) {
 	int gridVert = makeShader("shaders/grid.vert.glsl", GL_VERTEX_SHADER);
 	int gridFrag = makeShader("shaders/grid.frag.glsl", GL_FRAGMENT_SHADER);
 
+	// for text
+	int textVert = makeShader("shaders/text.vert.glsl", GL_VERTEX_SHADER);
+	int textFrag = makeShader("shaders/text.frag.glsl", GL_FRAGMENT_SHADER);
+
 	// for overlay
 	int overVert = makeShader("shaders/overlay.vert.glsl", GL_VERTEX_SHADER);
 	int overFrag = makeShader("shaders/overlay.frag.glsl", GL_FRAGMENT_SHADER);
 
 	// shader creation failed
-	if (pointsVert == 0 || pointsFrag == 0 ||
-	    overVert == 0 || overFrag == 0 ||
-	    overVert == 0 || overFrag == 0) {
-		
+	if (pointsVert == 0 || pointsFrag == 0 || gridVert == 0 || gridFrag == 0 ||
+	    textVert == 0 || textFrag == 0 || overVert == 0 || overFrag == 0) {
 		glfwTerminate();
 		free(plot);
 		return NULL;
@@ -85,21 +87,27 @@ QDSPplot *qdspInit(const char *title) {
 	glAttachShader(plot->pointsProgram, pointsFrag);
 	glLinkProgram(plot->pointsProgram);
 
+	plot->textProgram = glCreateProgram();
+	glAttachShader(plot->textProgram, textVert);
+	glAttachShader(plot->textProgram, textFrag);
+	glLinkProgram(plot->textProgram);
+
 	plot->gridProgram = glCreateProgram();
 	glAttachShader(plot->gridProgram, gridVert);
 	glAttachShader(plot->gridProgram, gridFrag);
 	glLinkProgram(plot->gridProgram);
-	
+
 	plot->overlayProgram = glCreateProgram();
 	glAttachShader(plot->overlayProgram, overVert);
 	glAttachShader(plot->overlayProgram, overFrag);
 	glLinkProgram(plot->overlayProgram);
 
-	int pointSuccess, gridSuccess, overSuccess;
+	int pointSuccess, gridSuccess, textSuccess, overSuccess;
 	glGetProgramiv(plot->pointsProgram, GL_LINK_STATUS, &pointSuccess);
 	glGetProgramiv(plot->gridProgram, GL_LINK_STATUS, &gridSuccess);
+	glGetProgramiv(plot->textProgram, GL_LINK_STATUS, &textSuccess);
 	glGetProgramiv(plot->overlayProgram, GL_LINK_STATUS, &overSuccess);
-	if (!pointSuccess || !gridSuccess || !overSuccess) {
+	if (!pointSuccess || !gridSuccess || !textSuccess || !overSuccess) {
 		char log[1024];
 		glGetProgramInfoLog(plot->pointsProgram, 1024, NULL, log);
 		fprintf(stderr, "Error linking program\n");
@@ -113,6 +121,8 @@ QDSPplot *qdspInit(const char *title) {
 	glDeleteShader(pointsFrag);
 	glDeleteShader(gridVert);
 	glDeleteShader(gridFrag);
+	glDeleteShader(textVert);
+	glDeleteShader(textFrag);
 	glDeleteShader(overVert);
 	glDeleteShader(overFrag);
 
@@ -155,13 +165,15 @@ QDSPplot *qdspInit(const char *title) {
 	glBindBuffer(GL_ARRAY_BUFFER, plot->gridVBOy);
 	glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), NULL);
 	glEnableVertexAttribArray(0);
+
+	// buffer setup for text
 	
+
 	// buffer setup for overlay
 	glGenVertexArrays(1, &plot->overlayVAO);
 	glGenBuffers(1, &plot->overlayVBO);
-	
-	glBindVertexArray(plot->overlayVAO);
 
+	glBindVertexArray(plot->overlayVAO);
 	glBindBuffer(GL_ARRAY_BUFFER, plot->overlayVBO);
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), NULL);
 	glEnableVertexAttribArray(0);
