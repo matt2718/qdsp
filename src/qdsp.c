@@ -30,7 +30,7 @@ QDSPplot *qdspInit(const char *title) {
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-	
+	glfwWindowHint(GLFW_CONTEXT_RELEASE_BEHAVIOR, GLFW_RELEASE_BEHAVIOR_NONE);
 	// make window, basic config
 	plot->window = glfwCreateWindow(800, 600, title, NULL, NULL);
 
@@ -231,7 +231,8 @@ QDSPplot *qdspInit(const char *title) {
 	// default bounds
 	qdspSetBounds(plot, -1.0f, 1.0f, -1.0f, 1.0f);
 
-	// default colors: yellow points, black background
+	// default: single points, yellow, black background
+	qdspSetConnected(plot, 0);
 	qdspSetPointColor(plot, 0xffff33);
 	qdspSetBGColor(plot, 0x000000);
 	
@@ -343,7 +344,8 @@ void qdspRedraw(QDSPplot *plot) {
 	// points
 	glUseProgram(plot->pointsProgram);
 	glBindVertexArray(plot->pointsVAO);
-	glDrawArrays(GL_POINTS, 0, plot->numPoints);
+	glDrawArrays(plot->connected ? GL_LINE_STRIP : GL_POINTS,
+	             0, plot->numPoints);
 	
 	// help overlay
 	if (plot->overlay) {
@@ -382,6 +384,10 @@ void qdspSetBounds(QDSPplot *plot, double xMin, double xMax, double yMin, double
 
 	if (plot->yAutoGrid)
 		qdspSetGridY(plot, yMin, (yMax - yMin) / 4, 0x000000);
+}
+
+void qdspSetConnected(QDSPplot *plot, int connected) {
+	plot->connected = connected;
 }
 
 void qdspSetPointColor(QDSPplot *plot, int rgb) {

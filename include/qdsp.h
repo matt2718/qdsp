@@ -19,6 +19,8 @@ typedef struct QDSPplot {
 	// bounds, we could probably use glGetUniform, but storing them is easier
 	double xMin, xMax;
 	double yMin, yMax;
+
+	int connected;
 	
 	// opengl stuff:
 	int pointsProgram;
@@ -60,6 +62,8 @@ void qdspRedraw(QDSPplot *plot);
 void qdspSetFramerate(QDSPplot *plot, double framerate);
 
 void qdspSetBounds(QDSPplot *plot, double xMin, double xMax, double yMin, double yMax);
+
+void qdspSetConnected(QDSPplot *plot, int connected);
 
 void qdspSetPointColor(QDSPplot *plot, int rgb);
 
