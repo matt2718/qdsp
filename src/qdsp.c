@@ -244,7 +244,7 @@ QDSPplot *qdspInit(const char *title) {
 	plot->yAutoGrid = 1;
 
 	resizeCallback(plot->window, 800, 600);
-	
+	glfwSwapInterval(0);
 	// framerate stuff
 	clock_gettime(CLOCK_MONOTONIC, &plot->lastUpdate);
 
