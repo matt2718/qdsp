@@ -35,6 +35,13 @@ typedef struct QDSPplot {
 	unsigned int gridVAOy;
 	unsigned int gridVBOy;
 
+	int textProgram;
+	unsigned int textVAOx;
+	unsigned int textVBOx;
+	unsigned int textVAOy;
+	unsigned int textVBOy;
+	unsigned int numTexture;
+
 	int overlayProgram;
 	unsigned int overlayVAO;
 	unsigned int overlayVBO;
@@ -44,7 +51,7 @@ typedef struct QDSPplot {
 	int numPoints;
 	int numGridX;
 	int numGridY;
-	
+
 } QDSPplot;
 
 QDSPplot *qdspInit(const char *title);
