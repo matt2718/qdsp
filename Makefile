@@ -6,7 +6,7 @@ EXAMPLE_CFLAGS=-std=gnu99 -fopenmp -I./include
 
 SOURCES=qdsp.c glad.c
 SHADERS=points.vert.glsl points.frag.glsl overlay.vert.glsl overlay.frag.glsl
-IMAGES=images/helpmessage.png images/numbers.png
+IMAGES=images/helpmessage.png images/digits.png
 
 OBJECTS=$(SOURCES:.c=.o)
 
@@ -59,9 +59,9 @@ images/helpmessage.png: helpmessage
 	  -fill white -annotate +15+15 "$$(cat resources/helpmessage)" \
 	  images/helpmessage.png
 
-images/numbers.png:
-	convert -size 312x48 xc:white -font "Ubuntu-Mono" -pointsize 48 \
-	  -fill black -annotate +0+40 "0123456789.-e" images/numbers.png
+images/digits.png:
+	convert -size 252x36 xc:white -font "Ubuntu-Mono" -pointsize 36 \
+	  -fill black -annotate +0+30 "0123456789.-e " images/digits.png
 
 qdsp.o: qdsp.h glad/glad.h
 

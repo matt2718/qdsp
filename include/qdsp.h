@@ -38,6 +38,7 @@ typedef struct QDSPplot {
 	unsigned int textVBOx;
 	unsigned int textVAOy;
 	unsigned int textVBOy;
+	unsigned int numTexture;
 
 	int overlayProgram;
 	unsigned int overlayVAO;

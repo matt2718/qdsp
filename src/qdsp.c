@@ -20,7 +20,11 @@ static void keyCallback(GLFWwindow *window, int key, int code, int action, int m
 
 static int makeShader(const char *filename, GLenum type);
 
+static int loadTexture(const char *relpath, int *width, int *height);
+
 static void resourcePath(char *fullpath, const char *relpath);
+
+static void charHelper(float *addr, float x0, float y0, int off, int digit);
 
 QDSPplot *qdspInit(const char *title) {
 	QDSPplot *plot = malloc(sizeof(QDSPplot));
@@ -166,9 +170,58 @@ QDSPplot *qdspInit(const char *title) {
 	glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), NULL);
 	glEnableVertexAttribArray(0);
 
-	// buffer setup for text
-	
+	// buffer setup for x grid labels
+	glGenVertexArrays(1, &plot->textVAOx);
+	glGenBuffers(1, &plot->textVBOx);
 
+	glBindVertexArray(plot->textVAOx);
+	glBindBuffer(GL_ARRAY_BUFFER, plot->textVBOx);
+
+	// xy start and offset
+	glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 6 * sizeof(float), 0);
+	glEnableVertexAttribArray(0);
+	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 6 * sizeof(float),
+	                      (void*)(2 * sizeof(float)));
+	glEnableVertexAttribArray(1);
+	// texture coord
+	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 6 * sizeof(float),
+	                      (void*)(4 * sizeof(float)));
+	glEnableVertexAttribArray(2);
+	
+	// buffer setup for y grid labels
+	glGenVertexArrays(1, &plot->textVAOy);
+	glGenBuffers(1, &plot->textVBOy);
+
+	glBindVertexArray(plot->textVAOy);
+	glBindBuffer(GL_ARRAY_BUFFER, plot->textVBOy);
+
+	// xy start and offset
+	glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 6 * sizeof(float), 0);
+	glEnableVertexAttribArray(0);
+	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 6 * sizeof(float),
+	                      (void*)(2 * sizeof(float)));
+	glEnableVertexAttribArray(1);
+	// texture coord
+	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 6 * sizeof(float),
+	                      (void*)(4 * sizeof(float)));
+	glEnableVertexAttribArray(2);
+
+	int imgWidth, imgHeight;
+	// texture for drawing digits
+	glGenTextures(1, &plot->numTexture);
+	glBindTexture(GL_TEXTURE_2D, plot->numTexture);
+
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+	loadTexture("images/digits.png", &imgWidth, &imgHeight);	
+
+	glUseProgram(plot->textProgram);
+	glUniform2f(glGetUniformLocation(plot->textProgram, "charDims"),
+	            imgWidth/14, imgHeight);
+	
 	// buffer setup for overlay
 	glGenVertexArrays(1, &plot->overlayVAO);
 	glGenBuffers(1, &plot->overlayVBO);
@@ -200,33 +253,8 @@ QDSPplot *qdspInit(const char *title) {
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
-	// load image with SOIL
-	int imgWidth, imgHeight;
-
-	char *imgRelPath = "images/helpmessage.png";
-	char imgPath[256];
-	resourcePath(imgPath, imgRelPath);
-
-	unsigned char *imgData = SOIL_load_image(imgPath, &imgWidth, &imgHeight,
-	                                         NULL, SOIL_LOAD_RGB);
-	if (imgData == NULL)
-		// loading failed, try current dir
-		imgData = SOIL_load_image(imgRelPath, &imgWidth, &imgHeight,
-		                          NULL, SOIL_LOAD_RGB);
-		
-	if (imgData == NULL) { // file is nowhere
-		fprintf(stderr, "Could not find file: %s\n", imgPath);
-		fprintf(stderr, "Could not find file: %s\n", imgRelPath);
-		glfwTerminate();
-		free(plot);
-		return NULL;
-	}
-
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, imgWidth, imgHeight, 0, GL_RGB,
-	             GL_UNSIGNED_BYTE, imgData);
+	loadTexture("images/helpmessage.png", &imgWidth, &imgHeight);
 	
-	SOIL_free_image_data(imgData);
-
 	// dimensions
 	glUseProgram(plot->overlayProgram);
 	glUniform2f(glGetUniformLocation(plot->overlayProgram, "imgDims"),
@@ -352,6 +380,18 @@ void qdspRedraw(QDSPplot *plot) {
 	glUseProgram(plot->pointsProgram);
 	glBindVertexArray(plot->pointsVAO);
 	glDrawArrays(GL_POINTS, 0, plot->numPoints);
+
+	// labels
+	if (plot->grid) {
+		glUseProgram(plot->textProgram);
+		glBindTexture(GL_TEXTURE_2D, plot->numTexture);
+			
+		glBindVertexArray(plot->textVAOx);
+		glDrawArrays(GL_TRIANGLES, 0, 12 * plot->numGridX);
+
+		glBindVertexArray(plot->textVAOy);
+		glDrawArrays(GL_TRIANGLES, 0, 12 * plot->numGridY);
+	}
 	
 	// help overlay
 	if (plot->overlay) {
@@ -413,7 +453,8 @@ void qdspSetGridX(QDSPplot *plot, double point, double interval, int rgb) {
 	plot->numGridX = numLines;
 	
 	float *coords = malloc(4 * numLines * sizeof(float));
-	
+	float *labels = malloc(2 * 6 * 6 * numLines * sizeof(float));
+
 	for (int i = 0; i < numLines; i++) {
 		double x = point + (iMin + i) * interval;
 		double xNorm = 2 * (x - plot->xMin) / (plot->xMax - plot->xMin) - 1;
@@ -421,6 +462,9 @@ void qdspSetGridX(QDSPplot *plot, double point, double interval, int rgb) {
 		coords[4*i + 1] = -1;
 		coords[4*i + 2] = xNorm;
 		coords[4*i + 3] = 1;
+
+		charHelper(&labels[72*i], xNorm, -1, 0, i);
+		charHelper(&labels[72*i + 36], xNorm, -1, 1, i + 1);
 	}
 
 	glUseProgram(plot->gridProgram);
@@ -430,6 +474,11 @@ void qdspSetGridX(QDSPplot *plot, double point, double interval, int rgb) {
 	glBindBuffer(GL_ARRAY_BUFFER, plot->gridVBOx);
 	glBufferData(GL_ARRAY_BUFFER, 4 * numLines * sizeof(float), coords, GL_STATIC_DRAW);
 
+	// pass label data
+	glBindVertexArray(plot->textVAOx);
+	glBindBuffer(GL_ARRAY_BUFFER, plot->textVBOx);
+	glBufferData(GL_ARRAY_BUFFER, 72 * numLines * sizeof(float), labels, GL_STATIC_DRAW);
+	
 	// pass rgba
 	glUniform4f(glGetUniformLocation(plot->gridProgram, "xColor"),
 	            (0xff & rgb >> 16) / 255.0,
@@ -438,6 +487,7 @@ void qdspSetGridX(QDSPplot *plot, double point, double interval, int rgb) {
 	            1.0f);
 	
 	free(coords);
+	free(labels);
 }
 
 void qdspSetGridY(QDSPplot *plot, double point, double interval, int rgb) {
@@ -451,6 +501,7 @@ void qdspSetGridY(QDSPplot *plot, double point, double interval, int rgb) {
 	plot->numGridY = numLines;
 	
 	float *coords = malloc(4 * numLines * sizeof(float));
+	float *labels = malloc(2 * 6 * 6 * numLines * sizeof(float));
 	
 	for (int i = 0; i < numLines; i++) {
 		double y = point + (iMin + i) * interval;
@@ -459,6 +510,9 @@ void qdspSetGridY(QDSPplot *plot, double point, double interval, int rgb) {
 		coords[4*i + 1] = yNorm;
 		coords[4*i + 2] = 1;
 		coords[4*i + 3] = yNorm;
+
+		charHelper(&labels[72*i], -1, yNorm, 0, i);
+		charHelper(&labels[72*i + 36], -1, yNorm, 1, i + 1);
 	}
 
 	glUseProgram(plot->gridProgram);
@@ -468,6 +522,11 @@ void qdspSetGridY(QDSPplot *plot, double point, double interval, int rgb) {
 	glBindBuffer(GL_ARRAY_BUFFER, plot->gridVBOy);
 	glBufferData(GL_ARRAY_BUFFER, 4 * numLines * sizeof(float), coords, GL_STATIC_DRAW);
 
+	// pass label data
+	glBindVertexArray(plot->textVAOy);
+	glBindBuffer(GL_ARRAY_BUFFER, plot->textVBOy);
+	glBufferData(GL_ARRAY_BUFFER, 72 * numLines * sizeof(float), labels, GL_STATIC_DRAW);
+	
 	// pass rgba
 	glUniform4f(glGetUniformLocation(plot->gridProgram, "yColor"),
 	            (0xff & rgb >> 16) / 255.0,
@@ -475,7 +534,30 @@ void qdspSetGridY(QDSPplot *plot, double point, double interval, int rgb) {
 	            (0xff & rgb) / 255.0,
 	            1.0f);	
 	
-	free(coords);	
+	free(coords);
+	free(labels);
+}
+
+static void charHelper(float *addr, float x0, float y0, int off, int digit) {
+	if (digit < 0 || 14 <= digit) // default to ' '
+		digit = 13;
+
+	// coordinates for vertices of each triangle
+	//        tri1       tri2
+	int dx[] = {0, 1, 0,   1, 0, 1};
+	int dy[] = {0, 0, 1,   0, 1, 1};
+
+	for (int i = 0; i < 6; i++) {
+		// xbase, ybase (same for all)
+		addr[6*i + 0] = x0;
+		addr[6*i + 1] = y0;
+		// xoff, yoff (we assume no chars are vertically offset)
+		addr[6*i + 2] = off + dx[i];
+		addr[6*i + 3] = dy[i];
+		// tex coords
+		addr[6*i + 4] = (digit + dx[i]) / 14.0;
+		addr[6*i + 5] = 1 - dy[i];
+	}
 }
 
 static void closeCallback(GLFWwindow *window) {
@@ -485,10 +567,15 @@ static void closeCallback(GLFWwindow *window) {
 
 static void resizeCallback(GLFWwindow *window, int width, int height) {
 	QDSPplot *plot = glfwGetWindowUserPointer(window);
+
 	glUseProgram(plot->overlayProgram);
 	glUniform2f(glGetUniformLocation(plot->overlayProgram, "pixDims"),
 	            width, height);
-	
+
+	glUseProgram(plot->textProgram);
+	glUniform2f(glGetUniformLocation(plot->textProgram, "pixDims"),
+	            width, height);
+
 	glViewport(0, 0, width, height);
 
 	if (plot->paused)
@@ -573,6 +660,36 @@ static int makeShader(const char *filename, GLenum type) {
 
 	free(buf);
 	return shader;
+}
+
+// load image with SOIL and pass to currently bound texture
+static int loadTexture(const char *relpath, int *width, int *height) {
+	// width or height could be null, so it's safer to use our own
+	int imgWidth, imgHeight;
+	
+	char fullpath[256];
+	resourcePath(fullpath, relpath);
+
+	unsigned char *imgData = SOIL_load_image(relpath, &imgWidth, &imgHeight,
+	                                         NULL, SOIL_LOAD_RGB);
+	if (imgData == NULL)
+		// loading failed, try current dir
+		imgData = SOIL_load_image(relpath, &imgWidth, &imgHeight,
+		                          NULL, SOIL_LOAD_RGB);
+		
+	if (imgData == NULL) { // file is nowhere
+		fprintf(stderr, "Could not find file: %s\n", fullpath);
+		fprintf(stderr, "Could not find file: %s\n", relpath);
+		return 0;
+	}
+
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, imgWidth, imgHeight, 0, GL_RGB,
+	             GL_UNSIGNED_BYTE, imgData);
+	
+	SOIL_free_image_data(imgData);
+
+	if (width != NULL) *width = imgWidth;
+	if (height != NULL) *height = imgHeight;
 }
 
 static void resourcePath(char *fullpath, const char *relpath) {
