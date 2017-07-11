@@ -24,7 +24,7 @@ static int loadTexture(const char *relpath, int *width, int *height);
 
 static void resourcePath(char *fullpath, const char *relpath);
 
-static void charHelper(float *addr, float x0, float y0, int off, int digit);
+static void charHelper(float *addr, float x0, float y0, int xoff, int yoff, char ch);
 
 QDSPplot *qdspInit(const char *title) {
 	QDSPplot *plot = malloc(sizeof(QDSPplot));
@@ -463,8 +463,9 @@ void qdspSetGridX(QDSPplot *plot, double point, double interval, int rgb) {
 		coords[4*i + 2] = xNorm;
 		coords[4*i + 3] = 1;
 
-		charHelper(&labels[72*i], xNorm, -1, 0, i);
-		charHelper(&labels[72*i + 36], xNorm, -1, 1, i + 1);
+		int off = (i == 0);
+		charHelper(&labels[72*i +  0], xNorm, -1, off + 0, 0, '0' + i);
+		charHelper(&labels[72*i + 36], xNorm, -1, off + 1, 0, '1' + i);
 	}
 
 	glUseProgram(plot->gridProgram);
@@ -511,8 +512,9 @@ void qdspSetGridY(QDSPplot *plot, double point, double interval, int rgb) {
 		coords[4*i + 2] = 1;
 		coords[4*i + 3] = yNorm;
 
-		charHelper(&labels[72*i], -1, yNorm, 0, i);
-		charHelper(&labels[72*i + 36], -1, yNorm, 1, i + 1);
+		int off = (i == 0);
+		charHelper(&labels[72*i +  0], -1, yNorm, 0, off, '0' + i);
+		charHelper(&labels[72*i + 36], -1, yNorm, 1, off, '1' + i);
 	}
 
 	glUseProgram(plot->gridProgram);
@@ -538,9 +540,14 @@ void qdspSetGridY(QDSPplot *plot, double point, double interval, int rgb) {
 	free(labels);
 }
 
-static void charHelper(float *addr, float x0, float y0, int off, int digit) {
-	if (digit < 0 || 14 <= digit) // default to ' '
-		digit = 13;
+static void charHelper(float *addr, float x0, float y0, int xoff, int yoff, char ch) {
+	// get location of ch in image, which contains "0123456789.-e "
+	int charIdx;
+	if ('0' <= ch && ch <= '9') charIdx = ch - '0';
+	else if (ch == '.') charIdx = 10;
+	else if (ch == '-') charIdx = 11;
+	else if (ch == 'e' || ch == 'E') charIdx = 12;
+	else charIdx = 13; // default to ' '
 
 	// coordinates for vertices of each triangle
 	//        tri1       tri2
@@ -551,11 +558,11 @@ static void charHelper(float *addr, float x0, float y0, int off, int digit) {
 		// xbase, ybase (same for all)
 		addr[6*i + 0] = x0;
 		addr[6*i + 1] = y0;
-		// xoff, yoff (we assume no chars are vertically offset)
-		addr[6*i + 2] = off + dx[i];
-		addr[6*i + 3] = dy[i];
+		// xoff, yoff
+		addr[6*i + 2] = xoff + dx[i];
+		addr[6*i + 3] = yoff + dy[i];
 		// tex coords
-		addr[6*i + 4] = (digit + dx[i]) / 14.0;
+		addr[6*i + 4] = (charIdx + dx[i]) / 14.0;
 		addr[6*i + 5] = 1 - dy[i];
 	}
 }
@@ -671,11 +678,11 @@ static int loadTexture(const char *relpath, int *width, int *height) {
 	resourcePath(fullpath, relpath);
 
 	unsigned char *imgData = SOIL_load_image(relpath, &imgWidth, &imgHeight,
-	                                         NULL, SOIL_LOAD_RGB);
+	                                         NULL, SOIL_LOAD_RGBA);
 	if (imgData == NULL)
 		// loading failed, try current dir
 		imgData = SOIL_load_image(relpath, &imgWidth, &imgHeight,
-		                          NULL, SOIL_LOAD_RGB);
+		                          NULL, SOIL_LOAD_RGBA);
 		
 	if (imgData == NULL) { // file is nowhere
 		fprintf(stderr, "Could not find file: %s\n", fullpath);
@@ -683,7 +690,7 @@ static int loadTexture(const char *relpath, int *width, int *height) {
 		return 0;
 	}
 
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, imgWidth, imgHeight, 0, GL_RGB,
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, imgWidth, imgHeight, 0, GL_RGBA,
 	             GL_UNSIGNED_BYTE, imgData);
 	
 	SOIL_free_image_data(imgData);
