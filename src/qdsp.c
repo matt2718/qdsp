@@ -220,7 +220,7 @@ QDSPplot *qdspInit(const char *title) {
 
 	glUseProgram(plot->textProgram);
 	glUniform2f(glGetUniformLocation(plot->textProgram, "charDims"),
-	            imgWidth/14, imgHeight);
+	            imgWidth/15, imgHeight);
 	
 	// buffer setup for overlay
 	glGenVertexArrays(1, &plot->overlayVAO);
@@ -387,10 +387,10 @@ void qdspRedraw(QDSPplot *plot) {
 		glBindTexture(GL_TEXTURE_2D, plot->numTexture);
 			
 		glBindVertexArray(plot->textVAOx);
-		glDrawArrays(GL_TRIANGLES, 0, 12 * plot->numGridX);
+		glDrawArrays(GL_TRIANGLES, 0, 6 * 10 * plot->numGridX);
 
 		glBindVertexArray(plot->textVAOy);
-		glDrawArrays(GL_TRIANGLES, 0, 12 * plot->numGridY);
+		glDrawArrays(GL_TRIANGLES, 0, 6 * 10 * plot->numGridY);
 	}
 	
 	// help overlay
@@ -453,7 +453,9 @@ void qdspSetGridX(QDSPplot *plot, double point, double interval, int rgb) {
 	plot->numGridX = numLines;
 	
 	float *coords = malloc(4 * numLines * sizeof(float));
-	float *labels = malloc(2 * 6 * 6 * numLines * sizeof(float));
+
+	// 10 chars/label, 36 floats/char
+	float *labels = malloc(10 * 36 * numLines * sizeof(float));
 
 	for (int i = 0; i < numLines; i++) {
 		double x = point + (iMin + i) * interval;
@@ -463,9 +465,12 @@ void qdspSetGridX(QDSPplot *plot, double point, double interval, int rgb) {
 		coords[4*i + 2] = xNorm;
 		coords[4*i + 3] = 1;
 
-		int off = (i == 0);
-		charHelper(&labels[72*i +  0], xNorm, -1, off + 0, 0, '0' + i);
-		charHelper(&labels[72*i + 36], xNorm, -1, off + 1, 0, '1' + i);
+		char str[11];
+		snprintf(str, 11, "% .3e", x);
+		
+		int off = (i == 0); // to prevent overlap, offset bottom left by 1
+		for (int j = 0; j < 10; j++)
+			charHelper(&labels[36*(10*i + j)], xNorm, -1, off + j, 0, str[j]);
 	}
 
 	glUseProgram(plot->gridProgram);
@@ -478,7 +483,7 @@ void qdspSetGridX(QDSPplot *plot, double point, double interval, int rgb) {
 	// pass label data
 	glBindVertexArray(plot->textVAOx);
 	glBindBuffer(GL_ARRAY_BUFFER, plot->textVBOx);
-	glBufferData(GL_ARRAY_BUFFER, 72 * numLines * sizeof(float), labels, GL_STATIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, 10 * 36 * numLines * sizeof(float), labels, GL_STATIC_DRAW);
 	
 	// pass rgba
 	glUniform4f(glGetUniformLocation(plot->gridProgram, "xColor"),
@@ -502,7 +507,8 @@ void qdspSetGridY(QDSPplot *plot, double point, double interval, int rgb) {
 	plot->numGridY = numLines;
 	
 	float *coords = malloc(4 * numLines * sizeof(float));
-	float *labels = malloc(2 * 6 * 6 * numLines * sizeof(float));
+	// 10 chars/label, 36 floats/char
+	float *labels = malloc(10 * 36 * numLines * sizeof(float));
 	
 	for (int i = 0; i < numLines; i++) {
 		double y = point + (iMin + i) * interval;
@@ -512,9 +518,12 @@ void qdspSetGridY(QDSPplot *plot, double point, double interval, int rgb) {
 		coords[4*i + 2] = 1;
 		coords[4*i + 3] = yNorm;
 
+		char str[11];
+		snprintf(str, 11, "% .3e", y);
+		
 		int off = (i == 0);
-		charHelper(&labels[72*i +  0], -1, yNorm, 0, off, '0' + i);
-		charHelper(&labels[72*i + 36], -1, yNorm, 1, off, '1' + i);
+		for (int j = 0; j < 10; j++)
+			charHelper(&labels[36*(10*i + j)], -1, yNorm, j, off, str[j]);
 	}
 
 	glUseProgram(plot->gridProgram);
@@ -527,7 +536,7 @@ void qdspSetGridY(QDSPplot *plot, double point, double interval, int rgb) {
 	// pass label data
 	glBindVertexArray(plot->textVAOy);
 	glBindBuffer(GL_ARRAY_BUFFER, plot->textVBOy);
-	glBufferData(GL_ARRAY_BUFFER, 72 * numLines * sizeof(float), labels, GL_STATIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, 10 * 36 * numLines * sizeof(float), labels, GL_STATIC_DRAW);
 	
 	// pass rgba
 	glUniform4f(glGetUniformLocation(plot->gridProgram, "yColor"),
@@ -541,16 +550,17 @@ void qdspSetGridY(QDSPplot *plot, double point, double interval, int rgb) {
 }
 
 static void charHelper(float *addr, float x0, float y0, int xoff, int yoff, char ch) {
-	// get location of ch in image, which contains "0123456789.-e "
+	// get location of ch in image, which contains "0123456789.+-e "
 	int charIdx;
 	if ('0' <= ch && ch <= '9') charIdx = ch - '0';
 	else if (ch == '.') charIdx = 10;
-	else if (ch == '-') charIdx = 11;
-	else if (ch == 'e' || ch == 'E') charIdx = 12;
-	else charIdx = 13; // default to ' '
+	else if (ch == '+') charIdx = 11;
+	else if (ch == '-') charIdx = 12;
+	else if (ch == 'e' || ch == 'E') charIdx = 13;
+	else charIdx = 14; // default to ' '
 
 	// coordinates for vertices of each triangle
-	//        tri1       tri2
+	//          tri1       tri2
 	int dx[] = {0, 1, 0,   1, 0, 1};
 	int dy[] = {0, 0, 1,   0, 1, 1};
 
@@ -562,7 +572,7 @@ static void charHelper(float *addr, float x0, float y0, int xoff, int yoff, char
 		addr[6*i + 2] = xoff + dx[i];
 		addr[6*i + 3] = yoff + dy[i];
 		// tex coords
-		addr[6*i + 4] = (charIdx + dx[i]) / 14.0;
+		addr[6*i + 4] = (charIdx + dx[i]) / 15.0;
 		addr[6*i + 5] = 1 - dy[i];
 	}
 }
@@ -677,7 +687,7 @@ static int loadTexture(const char *relpath, int *width, int *height) {
 	char fullpath[256];
 	resourcePath(fullpath, relpath);
 
-	unsigned char *imgData = SOIL_load_image(relpath, &imgWidth, &imgHeight,
+	unsigned char *imgData = SOIL_load_image(fullpath, &imgWidth, &imgHeight,
 	                                         NULL, SOIL_LOAD_RGBA);
 	if (imgData == NULL)
 		// loading failed, try current dir

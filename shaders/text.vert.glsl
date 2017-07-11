@@ -12,5 +12,7 @@ uniform vec2 charDims;
 void main() {
 	texCoord = st;
 	vec2 sizeFrac = charDims / pixDims;
-	gl_Position = vec4(start + sizeFrac * offset, 0.75, 1.0);
+	// shift up & right by 1px to avoid interfering with grid lines
+	vec2 pixShift = vec2(1.0, 1.0)/pixDims;
+	gl_Position = vec4(start + sizeFrac * offset + pixShift, 0.75, 1.0);
 }

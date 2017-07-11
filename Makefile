@@ -60,8 +60,8 @@ images/helpmessage.png: helpmessage
 	  images/helpmessage.png
 
 images/digits.png:
-	convert -size 252x36 xc:white -font "Ubuntu-Mono" -pointsize 36 \
-	  -fill black -annotate +0+30 "0123456789.-e " images/digits.png
+	convert -size 225x30 xc:white -font "Ubuntu-Mono" -pointsize 30 \
+	  -fill black -annotate +0+25 "0123456789.+-e " images/digits.png
 
 qdsp.o: qdsp.h glad/glad.h
 
