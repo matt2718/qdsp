@@ -7,11 +7,9 @@ Scatter Plot") is a lightweight C library for creating dynamic, real-time
 scatter plots. It was originally created to render phase plots for
 particle-in-cell plasma simulations.
 
-QDSP is still in early development, and should not be considered stable under
-any circumstances. The API could change without warning, at least until version
-1.0.0 is released. I'm using semantic versioning, so any changes made after
-1.0.0 will be backwards-compatible (unless I realize that I've made an
-unforgivable design decision and end up releasing a 2.0.0).
+QDSP uses semantic versioning, so any changes made after 1.0.0 will be
+backwards-compatible (until I realize that I've made an unforgivable design
+decision and end up releasing 2.0.0).
 
 ## Installation
 
@@ -35,9 +33,9 @@ To install, just run:
     $ sudo make install
     $ sudo ldconfig
 
-After building, this will install the shared library to `/usr/local/lib` and the
-header to `/usr/local/include`. You may need to add `/usr/local/lib` to your
-system's ldconfig path.
+After building, this will install the shared library to `/usr/local/lib`, the
+header to `/usr/local/include`, and resources to `/usr/local/share/qdsp` You may
+need to add `/usr/local/lib` to your system's ldconfig path.
 
 ## Usage
 
