@@ -3,3 +3,5 @@
 shaders.h
 example
 images/*
+docs/html/*
+docs/latex/*
