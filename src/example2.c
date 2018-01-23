@@ -8,12 +8,12 @@
 #include "qdsp.h"
 
 const double XMAX = 16.0; // system length
-const int NGRID = 256; // grid size
+const int NGRID = 128; // grid size
 double DX;
 
 // particle number and properties
 const int PART_NUM = 100000;
-const double PART_MASS = 1.0;
+const double PART_MASS = 0.005;
 const double PART_CHARGE = -0.01;
 const double EPS_0 = 1.0;
 
@@ -23,9 +23,9 @@ const double NMAX = 1000;
 
 // plans and buffers for fft
 fftw_plan rhoFFT;
-fftw_plan eIFFT;
-double *rhoxBuf, *exBuf;
-fftw_complex *rhokBuf, *ekBuf;
+fftw_plan phiIFFT;
+double *rhoxBuf, *phixBuf;
+fftw_complex *rhokBuf, *phikBuf;
 
 void init(double *x, double *v, int *color);
 
@@ -46,12 +46,12 @@ int main(int argc, char **argv) {
 
 	// transform buffers
 	rhoxBuf = fftw_malloc(NGRID * sizeof(double));
-	exBuf = fftw_malloc(NGRID * sizeof(double));
+	phixBuf = fftw_malloc(NGRID * sizeof(double));
 	rhokBuf = fftw_malloc(NGRID * sizeof(fftw_complex));
-	ekBuf = fftw_malloc(NGRID * sizeof(fftw_complex));
+	phikBuf = fftw_malloc(NGRID * sizeof(fftw_complex));
 	// plan transforms
 	rhoFFT = fftw_plan_dft_r2c_1d(NGRID, rhoxBuf, rhokBuf, FFTW_MEASURE);
-	eIFFT =  fftw_plan_dft_c2r_1d(NGRID, ekBuf, exBuf, FFTW_MEASURE);
+	phiIFFT = fftw_plan_dft_c2r_1d(NGRID, phikBuf, phixBuf, FFTW_MEASURE);
 
 	// initialize particles
 	init(x, v, color);
@@ -124,11 +124,11 @@ int main(int argc, char **argv) {
 
 	fftw_free(rhoxBuf);
 	fftw_free(rhokBuf);
-	fftw_free(exBuf);
-	fftw_free(ekBuf);
+	fftw_free(phixBuf);
+	fftw_free(phikBuf);
 
 	fftw_destroy_plan(rhoFFT);
-	fftw_destroy_plan(eIFFT);
+	fftw_destroy_plan(phiIFFT);
 
 	////////////////////////////////////////////////////////////
 	// frees plot resources. self-explanatory.
@@ -138,10 +138,9 @@ int main(int argc, char **argv) {
 }
 
 void init(double *x, double *v, int *color) {
-	double stdev = sqrt(50000 / (5.1e5));
+	double stddev = sqrt(500 / (5.1e5));
 	for (int i = 0; i < PART_NUM; i++) {
 		x[i] = i * XMAX / PART_NUM;
-
 		if (i % 2) {
 			v[i] = 8.0;
 			color[i] = 0xff0000;
@@ -150,9 +149,10 @@ void init(double *x, double *v, int *color) {
 			color[i] = 0x0000ff;
 		}
 
+		// box-mueller
 		double r1 = (rand() + 1) / ((double)RAND_MAX + 1); // log(0) breaks stuff
 		double r2 = (rand() + 1) / ((double)RAND_MAX + 1);
-		v[i] += stdev * sqrt(-2 * log(r1)) * cos(2 * M_PI * r2);
+		v[i] += stddev * sqrt(-2 * log(r1)) * cos(2 * M_PI * r2);
 	}
 }
 
@@ -184,20 +184,30 @@ void deposit(double *x, double *rho) {
 
 // determines E from rho
 void poisson(double *rho, double *e) {
-	memcpy(rhoxBuf, rho, NGRID * sizeof(double));
-
-	fftw_execute(rhoFFT);
+	// rho(x) -> rho(k)
 	for (int j = 0; j < NGRID; j++) {
-		double k = 2 * M_PI * j / XMAX;
-		ekBuf[j][0] =  rhokBuf[j][1] / (k * EPS_0);
-		ekBuf[j][1] = -rhokBuf[j][0] / (k * EPS_0);
+		// nomalization
+		rhoxBuf[j] = rho[j] / NGRID;
 	}
-	ekBuf[0][0] = 0;
-	ekBuf[0][1] = 0;
+	fftw_execute(rhoFFT);
 
-	fftw_execute(eIFFT);
+	// rho(k) -> phi(k)
+	phikBuf[0][0] = 0;
+	phikBuf[0][1] = 0;
+	for (int j = 1; j < NGRID / 2; j++) {
+		double k = 2 * M_PI * j / XMAX;
+		phikBuf[j][0] = rhokBuf[j][0] / (k * k * EPS_0);
+		phikBuf[j][1] = rhokBuf[j][1] / (k * k * EPS_0);
+	}
 
-	memcpy(e, exBuf, NGRID * sizeof(double));
+	// phi(k) -> phi(x)
+	fftw_execute(phiIFFT);
+
+	// phi(x) -> E(x) via finite difference
+	e[0] = (phixBuf[NGRID-1] - phixBuf[1]) / (2 * DX);
+	e[NGRID-1] = (phixBuf[NGRID-2] - phixBuf[0]) / (2 * DX);
+	for (int j = 1; j < NGRID - 1; j++)
+		e[j] = (phixBuf[j-1] - phixBuf[j+1]) / (2 * DX);
 }
 
 void xPush(double *x, double *v) {

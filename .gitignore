@@ -2,6 +2,8 @@
 *.so
 shaders.h
 example
+example1
+example2
 images/*
 docs/html/*
 docs/latex/*

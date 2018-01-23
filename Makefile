@@ -18,7 +18,7 @@ VPATH = src:include:shaders:resources
 all: libqdsp.so $(IMAGES)
 
 .PHONY: debug
-debug: libqdsp.so example
+debug: libqdsp.so example1 example2
 debug: CFLAGS += -g -O0
 debug: EXAMPLE_CFLAGS += -g -O0
 
@@ -26,7 +26,7 @@ debug: EXAMPLE_CFLAGS += -g -O0
 clean:
 	rm -rf images
 	rm -f libqdsp.so $(OBJECTS)
-	rm -f example
+	rm -f example1 example2
 
 .PHONY: install
 install: all qdsp.h $(SHADERS)
@@ -50,8 +50,11 @@ libqdsp.so: $(OBJECTS)
 .c.o:
 	$(CC) -o $@ -c $(CFLAGS) $<
 
-example: example.c all
-	$(CC) -o example $(EXAMPLE_CFLAGS) $< libqdsp.so -lm -lfftw3 -Lqdsp -Wl,-R.
+example1: example1.c all
+	$(CC) -o example1 $(EXAMPLE_CFLAGS) $< libqdsp.so -lm -Lqdsp -Wl,-R.
+
+example2: example2.c all
+	$(CC) -o example2 $(EXAMPLE_CFLAGS) $< libqdsp.so -lm -lfftw3 -Lqdsp -Wl,-R.
 
 images/helpmessage.png: helpmessage
 	mkdir -p images
