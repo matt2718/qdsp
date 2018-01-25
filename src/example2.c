@@ -71,7 +71,7 @@ int main(int argc, char **argv) {
 	//   interval between grid lines
 	//   grid color
 	// grid lines can be toggled by pressing 'g'
-	qdspSetGridX(plot, 0, 4, 0x000000);
+	qdspSetGridX(plot, 0, 2, 0x000000);
 	qdspSetGridY(plot, 0, 5, 0x000000);
 	
 	// default point color and background color. pretty self-explanatory

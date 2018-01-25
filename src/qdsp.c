@@ -29,6 +29,11 @@ static void charHelper(float *addr, float x0, float y0, int xoff, int yoff, char
 QDSPplot *qdspInit(const char *title) {
 	QDSPplot *plot = malloc(sizeof(QDSPplot));
 
+	// store base title so we can add status indicators later
+	int titleLen = strlen(title);
+	plot->title = malloc((titleLen + 1) * sizeof(char));
+	memcpy(plot->title, title, titleLen + 1);
+	
 	// create context
 	glfwInit();
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
@@ -294,6 +299,7 @@ QDSPplot *qdspInit(const char *title) {
 }
 
 void qdspDelete(QDSPplot *plot) {
+	free(plot->title);
 	free(plot);
 }
 
@@ -628,6 +634,22 @@ static void resizeCallback(GLFWwindow *window, int width, int height) {
 		qdspRedraw(plot);
 }
 
+static void updateTitle(QDSPplot *plot) {
+	// when frozen or paused, we need to toggle [f] and [p] in the titlebar
+	int titleLen = strlen(plot->title);
+	char *curTitle = malloc((titleLen + 10) * sizeof(char));
+	memcpy(curTitle, plot->title, titleLen + 1);
+
+	if (plot->frozen)
+		strcat(curTitle, " [f]");
+	if (plot->paused)
+		strcat(curTitle, " [p]");
+
+	glfwSetWindowTitle(plot->window, curTitle);
+	
+	free(curTitle);
+}
+
 static void keyCallback(GLFWwindow *window, int key, int code, int action, int mods) {
 	QDSPplot *plot = glfwGetWindowUserPointer(window);
 	glfwMakeContextCurrent(window);
@@ -642,11 +664,13 @@ static void keyCallback(GLFWwindow *window, int key, int code, int action, int m
 	// p - pause
 	if (key == GLFW_KEY_P && action == GLFW_PRESS) {
 		plot->paused = !plot->paused;
+		updateTitle(plot);
 	}
 
 	// f - freeze
 	if (key == GLFW_KEY_F && action == GLFW_PRESS) {
 		plot->frozen = !plot->frozen;
+		updateTitle(plot);
 	}
 	
 	// h - display help

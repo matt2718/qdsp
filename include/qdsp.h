@@ -14,6 +14,8 @@
 typedef struct QDSPplot {
 	GLFWwindow *window;
 
+	char *title;
+	
 	int paused;
 	int frozen;
 	int overlay;
