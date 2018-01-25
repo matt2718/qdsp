@@ -5,12 +5,18 @@
 QDSP, short for "Quick Dynamic Scatter Plot" (or alternatively, "Quick and Dirty
 Scatter Plot") is a lightweight C library for creating dynamic, real-time
 scatter plots. On decent hardware, it should be able to render 10^6 points every
-frame. QDSP was originally created to render phase plots for particle-in-cell
-simulations.
+frame.
 
 QDSP uses semantic versioning, so any changes made after 1.0.0 will be
 backwards-compatible (until I realize that I've made an unforgivable design
 decision and end up releasing 2.0.0).
+
+## Motivation
+I work in a research group that focuses on computational plasma physics. A few
+months back, I was troubleshooting some code, and I needed a way to view phase
+plots. Piping the data to gnuplot introduced too much overhead, so I hacked
+together some OpenGL to monitor my simulation in real time. This ended up being
+*really* useful, so I cleaned up the code and turned it into a library.
 
 ## Installation
 
@@ -25,8 +31,8 @@ package repositories:
 * [SOIL](http://www.lonesock.net/soil.html)
 * [ImageMagick](http://www.imagemagick.org/script/index.php)
 
-In addition, [Doxygen](http://www.doxygen.org) is required to generate easily
-readable documentation.
+In addition, [Doxygen](http://www.doxygen.org) is required to generate
+documentation.
 
 To install, just run:
 

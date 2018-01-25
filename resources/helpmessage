@@ -1,5 +1,13 @@
 KEYBINDINGS:
+
   g - Toggle grid
+  
   h - Toggle this help message
-  p - Pause/resume
+  
+  f - Toggle freeze
+      (update calls return without redrawing)
+
+  p - Toggle pause
+      (update calls hang)
+
   q - Exit

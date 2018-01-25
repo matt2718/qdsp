@@ -278,6 +278,7 @@ QDSPplot *qdspInit(const char *title) {
 	qdspSetBGColor(plot, 0x000000);
 	
 	plot->paused = 0;
+	plot->frozen = 0;
 	plot->overlay = 0;
 	plot->grid = 0;
 
@@ -309,6 +310,12 @@ int qdspUpdate(QDSPplot *plot, double *x, double *y, int *color, int numPoints) 
 	if (glfwWindowShouldClose(plot->window)) {
 		glfwDestroyWindow(plot->window);
 		return 0;
+	}
+
+	// frozen: don't update data
+	if (plot->frozen) {
+		glfwPollEvents();
+		return 2;
 	}
 	
 	// copy all our vertex stuff
@@ -637,6 +644,11 @@ static void keyCallback(GLFWwindow *window, int key, int code, int action, int m
 		plot->paused = !plot->paused;
 	}
 
+	// f - freeze
+	if (key == GLFW_KEY_F && action == GLFW_PRESS) {
+		plot->frozen = !plot->frozen;
+	}
+	
 	// h - display help
 	if (key == GLFW_KEY_H && action == GLFW_PRESS) {
 		plot->overlay = !plot->overlay;
