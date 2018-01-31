@@ -299,6 +299,7 @@ QDSPplot *qdspInit(const char *title) {
 }
 
 void qdspDelete(QDSPplot *plot) {
+	glfwTerminate();
 	free(plot->title);
 	free(plot);
 }
