@@ -19,7 +19,6 @@ addons:
     packages:
       - doxygen
       - doxygen-doc
-      - doxygen-latex
       - doxygen-gui
       - graphviz
 
