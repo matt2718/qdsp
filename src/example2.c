@@ -79,6 +79,11 @@ int main(int argc, char **argv) {
 	qdspSetPointColor(plot, 0x000000);
 	qdspSetBGColor(plot, 0xffffff);
 
+	// change these to set the point size and transparency
+	// opaque, 1 pixel points are the default
+	qdspSetPointSize(plot, 1);
+	qdspSetPointAlpha(plot, 1.0);
+	
 	// see below for update and cleanup code
 	////////////////////////////////////////////////////////////
 

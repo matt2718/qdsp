@@ -215,6 +215,9 @@ void qdspSetBounds(QDSPplot *plot, double xMin, double xMax, double yMin, double
  */
 void qdspSetConnected(QDSPplot *plot, int connected);
 
+void qdspSetPointSize(QDSPplot *plot, int pixels);
+void qdspSetPointAlpha(QDSPplot *plot, double alpha);
+
 /** Sets the default point color
  * 
  * This function sets the point color to use when no color array is specified
