@@ -119,12 +119,42 @@ typedef struct <a class="el" href="structQDSPplot.html">QDSPplot</a>&#160;</td><
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a name="func-members"></a>
 Functions</h2></td></tr>
-<tr class="memitem:ab48f58716694432ead3ad2aa738dd85d"><td class="memItemLeft" align="right" valign="top"><a class="el" href="structQDSPplot.html">QDSPplot</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="qdsp_8h.html#ab48f58716694432ead3ad2aa738dd85d">qdspInit</a> (const char *title)</td></tr>
-<tr class="memdesc:ab48f58716694432ead3ad2aa738dd85d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Creates a new plot.  <a href="#ab48f58716694432ead3ad2aa738dd85d">More...</a><br/></td></tr>
-<tr class="separator:ab48f58716694432ead3ad2aa738dd85d"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a8b50f4d00f550bbb3b6e50ed0c224f85"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="qdsp_8h.html#a8b50f4d00f550bbb3b6e50ed0c224f85">qdspDelete</a> (<a class="el" href="structQDSPplot.html">QDSPplot</a> *plot)</td></tr>
 <tr class="memdesc:a8b50f4d00f550bbb3b6e50ed0c224f85"><td class="mdescLeft">&#160;</td><td class="mdescRight">Destroys a plot.  <a href="#a8b50f4d00f550bbb3b6e50ed0c224f85">More...</a><br/></td></tr>
 <tr class="separator:a8b50f4d00f550bbb3b6e50ed0c224f85"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab48f58716694432ead3ad2aa738dd85d"><td class="memItemLeft" align="right" valign="top"><a class="el" href="structQDSPplot.html">QDSPplot</a> *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="qdsp_8h.html#ab48f58716694432ead3ad2aa738dd85d">qdspInit</a> (const char *title)</td></tr>
+<tr class="memdesc:ab48f58716694432ead3ad2aa738dd85d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Creates a new plot.  <a href="#ab48f58716694432ead3ad2aa738dd85d">More...</a><br/></td></tr>
+<tr class="separator:ab48f58716694432ead3ad2aa738dd85d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:aa96f95a11b1db411dfa77edc1e92c90b"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="qdsp_8h.html#aa96f95a11b1db411dfa77edc1e92c90b">qdspRedraw</a> (<a class="el" href="structQDSPplot.html">QDSPplot</a> *plot)</td></tr>
+<tr class="memdesc:aa96f95a11b1db411dfa77edc1e92c90b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Redraws a plot.  <a href="#aa96f95a11b1db411dfa77edc1e92c90b">More...</a><br/></td></tr>
+<tr class="separator:aa96f95a11b1db411dfa77edc1e92c90b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a7d4a0c9a9163f95dd71e1110ff8dc200"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="qdsp_8h.html#a7d4a0c9a9163f95dd71e1110ff8dc200">qdspSetBGColor</a> (<a class="el" href="structQDSPplot.html">QDSPplot</a> *plot, int rgb)</td></tr>
+<tr class="memdesc:a7d4a0c9a9163f95dd71e1110ff8dc200"><td class="mdescLeft">&#160;</td><td class="mdescRight">Sets the background color.  <a href="#a7d4a0c9a9163f95dd71e1110ff8dc200">More...</a><br/></td></tr>
+<tr class="separator:a7d4a0c9a9163f95dd71e1110ff8dc200"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a820c950bb4ec854be89ab60b73059d9c"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="qdsp_8h.html#a820c950bb4ec854be89ab60b73059d9c">qdspSetBounds</a> (<a class="el" href="structQDSPplot.html">QDSPplot</a> *plot, double xMin, double xMax, double yMin, double yMax)</td></tr>
+<tr class="memdesc:a820c950bb4ec854be89ab60b73059d9c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Sets the x and y bounds of a plot.  <a href="#a820c950bb4ec854be89ab60b73059d9c">More...</a><br/></td></tr>
+<tr class="separator:a820c950bb4ec854be89ab60b73059d9c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ad3faa9ad17a6292ee63e6adb5d251219"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="qdsp_8h.html#ad3faa9ad17a6292ee63e6adb5d251219">qdspSetConnected</a> (<a class="el" href="structQDSPplot.html">QDSPplot</a> *plot, int connected)</td></tr>
+<tr class="memdesc:ad3faa9ad17a6292ee63e6adb5d251219"><td class="mdescLeft">&#160;</td><td class="mdescRight">Specifies whether to connect the plot points.  <a href="#ad3faa9ad17a6292ee63e6adb5d251219">More...</a><br/></td></tr>
+<tr class="separator:ad3faa9ad17a6292ee63e6adb5d251219"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a4ef5cd65de47e9b40ee5b1060c801b15"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="qdsp_8h.html#a4ef5cd65de47e9b40ee5b1060c801b15">qdspSetGridX</a> (<a class="el" href="structQDSPplot.html">QDSPplot</a> *plot, double point, double interval, int rgb)</td></tr>
+<tr class="memdesc:a4ef5cd65de47e9b40ee5b1060c801b15"><td class="mdescLeft">&#160;</td><td class="mdescRight">Sets the locations of x gridlines.  <a href="#a4ef5cd65de47e9b40ee5b1060c801b15">More...</a><br/></td></tr>
+<tr class="separator:a4ef5cd65de47e9b40ee5b1060c801b15"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a8ab6e92e54babc386e60134318c273f3"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="qdsp_8h.html#a8ab6e92e54babc386e60134318c273f3">qdspSetGridY</a> (<a class="el" href="structQDSPplot.html">QDSPplot</a> *plot, double point, double interval, int rgb)</td></tr>
+<tr class="memdesc:a8ab6e92e54babc386e60134318c273f3"><td class="mdescLeft">&#160;</td><td class="mdescRight">Sets the locations of y gridlines.  <a href="#a8ab6e92e54babc386e60134318c273f3">More...</a><br/></td></tr>
+<tr class="separator:a8ab6e92e54babc386e60134318c273f3"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a6029ae216e906f1d55e2a9815022a93f"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="qdsp_8h.html#a6029ae216e906f1d55e2a9815022a93f">qdspSetFramerate</a> (<a class="el" href="structQDSPplot.html">QDSPplot</a> *plot, double framerate)</td></tr>
+<tr class="memdesc:a6029ae216e906f1d55e2a9815022a93f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Caps the update framerate of a plot.  <a href="#a6029ae216e906f1d55e2a9815022a93f">More...</a><br/></td></tr>
+<tr class="separator:a6029ae216e906f1d55e2a9815022a93f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a3a9b4142221b821913a1f1500979a31f"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="qdsp_8h.html#a3a9b4142221b821913a1f1500979a31f">qdspSetPointAlpha</a> (<a class="el" href="structQDSPplot.html">QDSPplot</a> *plot, double alpha)</td></tr>
+<tr class="memdesc:a3a9b4142221b821913a1f1500979a31f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Sets the point transparency.  <a href="#a3a9b4142221b821913a1f1500979a31f">More...</a><br/></td></tr>
+<tr class="separator:a3a9b4142221b821913a1f1500979a31f"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a53adc32f19510e7a7254b5a83f3cc502"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="qdsp_8h.html#a53adc32f19510e7a7254b5a83f3cc502">qdspSetPointColor</a> (<a class="el" href="structQDSPplot.html">QDSPplot</a> *plot, int rgb)</td></tr>
+<tr class="memdesc:a53adc32f19510e7a7254b5a83f3cc502"><td class="mdescLeft">&#160;</td><td class="mdescRight">Sets the default point color.  <a href="#a53adc32f19510e7a7254b5a83f3cc502">More...</a><br/></td></tr>
+<tr class="separator:a53adc32f19510e7a7254b5a83f3cc502"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a931b51e49d9d9f04727f5a02e30ddf8d"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="qdsp_8h.html#a931b51e49d9d9f04727f5a02e30ddf8d">qdspSetPointSize</a> (<a class="el" href="structQDSPplot.html">QDSPplot</a> *plot, int pixels)</td></tr>
+<tr class="memdesc:a931b51e49d9d9f04727f5a02e30ddf8d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Sets the size of the plot points.  <a href="#a931b51e49d9d9f04727f5a02e30ddf8d">More...</a><br/></td></tr>
+<tr class="separator:a931b51e49d9d9f04727f5a02e30ddf8d"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a9147cadf7ec7b1d89aa7e2af63d857c2"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="qdsp_8h.html#a9147cadf7ec7b1d89aa7e2af63d857c2">qdspUpdate</a> (<a class="el" href="structQDSPplot.html">QDSPplot</a> *plot, double *x, double *y, int *color, int numPoints)</td></tr>
 <tr class="memdesc:a9147cadf7ec7b1d89aa7e2af63d857c2"><td class="mdescLeft">&#160;</td><td class="mdescRight">Updates a plot immediately.  <a href="#a9147cadf7ec7b1d89aa7e2af63d857c2">More...</a><br/></td></tr>
 <tr class="separator:a9147cadf7ec7b1d89aa7e2af63d857c2"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -134,30 +164,6 @@ Functions</h2></td></tr>
 <tr class="memitem:a743a49615e3853bd2c54f1cbc9e7aae9"><td class="memItemLeft" align="right" valign="top">int&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="qdsp_8h.html#a743a49615e3853bd2c54f1cbc9e7aae9">qdspUpdateWait</a> (<a class="el" href="structQDSPplot.html">QDSPplot</a> *plot, double *x, double *y, int *color, int numPoints)</td></tr>
 <tr class="memdesc:a743a49615e3853bd2c54f1cbc9e7aae9"><td class="mdescLeft">&#160;</td><td class="mdescRight">Updates a plot after waiting for a new frame.  <a href="#a743a49615e3853bd2c54f1cbc9e7aae9">More...</a><br/></td></tr>
 <tr class="separator:a743a49615e3853bd2c54f1cbc9e7aae9"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aa96f95a11b1db411dfa77edc1e92c90b"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="qdsp_8h.html#aa96f95a11b1db411dfa77edc1e92c90b">qdspRedraw</a> (<a class="el" href="structQDSPplot.html">QDSPplot</a> *plot)</td></tr>
-<tr class="memdesc:aa96f95a11b1db411dfa77edc1e92c90b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Redraws a plot.  <a href="#aa96f95a11b1db411dfa77edc1e92c90b">More...</a><br/></td></tr>
-<tr class="separator:aa96f95a11b1db411dfa77edc1e92c90b"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a6029ae216e906f1d55e2a9815022a93f"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="qdsp_8h.html#a6029ae216e906f1d55e2a9815022a93f">qdspSetFramerate</a> (<a class="el" href="structQDSPplot.html">QDSPplot</a> *plot, double framerate)</td></tr>
-<tr class="memdesc:a6029ae216e906f1d55e2a9815022a93f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Caps the update framerate of a plot.  <a href="#a6029ae216e906f1d55e2a9815022a93f">More...</a><br/></td></tr>
-<tr class="separator:a6029ae216e906f1d55e2a9815022a93f"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a820c950bb4ec854be89ab60b73059d9c"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="qdsp_8h.html#a820c950bb4ec854be89ab60b73059d9c">qdspSetBounds</a> (<a class="el" href="structQDSPplot.html">QDSPplot</a> *plot, double xMin, double xMax, double yMin, double yMax)</td></tr>
-<tr class="memdesc:a820c950bb4ec854be89ab60b73059d9c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Sets the x and y bounds of a plot.  <a href="#a820c950bb4ec854be89ab60b73059d9c">More...</a><br/></td></tr>
-<tr class="separator:a820c950bb4ec854be89ab60b73059d9c"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ad3faa9ad17a6292ee63e6adb5d251219"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="qdsp_8h.html#ad3faa9ad17a6292ee63e6adb5d251219">qdspSetConnected</a> (<a class="el" href="structQDSPplot.html">QDSPplot</a> *plot, int connected)</td></tr>
-<tr class="memdesc:ad3faa9ad17a6292ee63e6adb5d251219"><td class="mdescLeft">&#160;</td><td class="mdescRight">Specifies whether to connect the plot points.  <a href="#ad3faa9ad17a6292ee63e6adb5d251219">More...</a><br/></td></tr>
-<tr class="separator:ad3faa9ad17a6292ee63e6adb5d251219"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a53adc32f19510e7a7254b5a83f3cc502"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="qdsp_8h.html#a53adc32f19510e7a7254b5a83f3cc502">qdspSetPointColor</a> (<a class="el" href="structQDSPplot.html">QDSPplot</a> *plot, int rgb)</td></tr>
-<tr class="memdesc:a53adc32f19510e7a7254b5a83f3cc502"><td class="mdescLeft">&#160;</td><td class="mdescRight">Sets the default point color.  <a href="#a53adc32f19510e7a7254b5a83f3cc502">More...</a><br/></td></tr>
-<tr class="separator:a53adc32f19510e7a7254b5a83f3cc502"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a7d4a0c9a9163f95dd71e1110ff8dc200"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="qdsp_8h.html#a7d4a0c9a9163f95dd71e1110ff8dc200">qdspSetBGColor</a> (<a class="el" href="structQDSPplot.html">QDSPplot</a> *plot, int rgb)</td></tr>
-<tr class="memdesc:a7d4a0c9a9163f95dd71e1110ff8dc200"><td class="mdescLeft">&#160;</td><td class="mdescRight">Sets the background color.  <a href="#a7d4a0c9a9163f95dd71e1110ff8dc200">More...</a><br/></td></tr>
-<tr class="separator:a7d4a0c9a9163f95dd71e1110ff8dc200"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a4ef5cd65de47e9b40ee5b1060c801b15"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="qdsp_8h.html#a4ef5cd65de47e9b40ee5b1060c801b15">qdspSetGridX</a> (<a class="el" href="structQDSPplot.html">QDSPplot</a> *plot, double point, double interval, int rgb)</td></tr>
-<tr class="memdesc:a4ef5cd65de47e9b40ee5b1060c801b15"><td class="mdescLeft">&#160;</td><td class="mdescRight">Sets the locations of x gridlines.  <a href="#a4ef5cd65de47e9b40ee5b1060c801b15">More...</a><br/></td></tr>
-<tr class="separator:a4ef5cd65de47e9b40ee5b1060c801b15"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a8ab6e92e54babc386e60134318c273f3"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="qdsp_8h.html#a8ab6e92e54babc386e60134318c273f3">qdspSetGridY</a> (<a class="el" href="structQDSPplot.html">QDSPplot</a> *plot, double point, double interval, int rgb)</td></tr>
-<tr class="memdesc:a8ab6e92e54babc386e60134318c273f3"><td class="mdescLeft">&#160;</td><td class="mdescRight">Sets the locations of y gridlines.  <a href="#a8ab6e92e54babc386e60134318c273f3">More...</a><br/></td></tr>
-<tr class="separator:a8ab6e92e54babc386e60134318c273f3"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><p>Functions for QDSP. </p>
@@ -182,10 +188,11 @@ Functions</h2></td></tr>
 <p>The plot object is freed and all resources are deleted.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">plot</td><td>The plot to destroy. </td></tr>
+    <tr><td class="paramname">plot</td><td>The plot to destroy.</td></tr>
   </table>
   </dd>
 </dl>
+<dl class="section see"><dt>See Also</dt><dd><a class="el" href="qdsp_8h.html#ab48f58716694432ead3ad2aa738dd85d">qdspInit</a> </dd></dl>
 
 </div>
 </div>
@@ -212,8 +219,8 @@ Functions</h2></td></tr>
   </table>
   </dd>
 </dl>
-<dl class="section return"><dt>Returns</dt><dd>A pointer to the plot handle, or NULL if a plot could not be created. </dd></dl>
-<dl class="section see"><dt>See Also</dt><dd></dd></dl>
+<dl class="section return"><dt>Returns</dt><dd>A pointer to the plot handle, or NULL if a plot could not be created.</dd></dl>
+<dl class="section see"><dt>See Also</dt><dd><a class="el" href="qdsp_8h.html#a8b50f4d00f550bbb3b6e50ed0c224f85">qdspDelete</a> </dd></dl>
 
 </div>
 </div>
@@ -235,10 +242,15 @@ Functions</h2></td></tr>
 <p>The given plot is redrawn immediately, ignoring any specified framerate.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">plot</td><td>The plot to redraw. </td></tr>
+    <tr><td class="paramname">plot</td><td>The plot to redraw.</td></tr>
   </table>
   </dd>
 </dl>
+<dl class="section see"><dt>See Also</dt><dd><a class="el" href="qdsp_8h.html#a9147cadf7ec7b1d89aa7e2af63d857c2">qdspUpdate</a> </dd>
+<dd>
+<a class="el" href="qdsp_8h.html#a960f4ed377ad791f7f1ed848e57dbdd7">qdspUpdateIfReady</a> </dd>
+<dd>
+<a class="el" href="qdsp_8h.html#a743a49615e3853bd2c54f1cbc9e7aae9">qdspUpdateWait</a> </dd></dl>
 
 </div>
 </div>
@@ -275,7 +287,11 @@ Functions</h2></td></tr>
   </table>
   </dd>
 </dl>
-<dl class="section see"><dt>See Also</dt><dd><a class="el" href="qdsp_8h.html#a53adc32f19510e7a7254b5a83f3cc502">qdspSetPointColor</a> </dd></dl>
+<dl class="section see"><dt>See Also</dt><dd><a class="el" href="qdsp_8h.html#a3a9b4142221b821913a1f1500979a31f">qdspSetPointAlpha</a> </dd>
+<dd>
+<a class="el" href="qdsp_8h.html#a53adc32f19510e7a7254b5a83f3cc502">qdspSetPointColor</a> </dd>
+<dd>
+<a class="el" href="qdsp_8h.html#a931b51e49d9d9f04727f5a02e30ddf8d">qdspSetPointSize</a> </dd></dl>
 
 </div>
 </div>
@@ -361,7 +377,7 @@ Functions</h2></td></tr>
 </div><div class="memdoc">
 
 <p>Specifies whether to connect the plot points. </p>
-<p>This function tells QDSP whether the points in the specified plot should be disconnected (to draw a scatter plot) or connected (to draw a line plot).</p>
+<p>This function tells QDSP whether the points in the specified plot should be disconnected (to draw a scatter plot) or connected (to draw a line plot). Points will always be connected in the order they appear in in the input array.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">plot</td><td>The plot to act on. </td></tr>
@@ -514,6 +530,47 @@ Functions</h2></td></tr>
 
 </div>
 </div>
+<a class="anchor" id="a3a9b4142221b821913a1f1500979a31f"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void qdspSetPointAlpha </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="structQDSPplot.html">QDSPplot</a> *&#160;</td>
+          <td class="paramname"><em>plot</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">double&#160;</td>
+          <td class="paramname"><em>alpha</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Sets the point transparency. </p>
+<p>This function sets the transparency of the plotted points.</p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">plot</td><td>The plot to act on. </td></tr>
+    <tr><td class="paramname">alpha</td><td>The alpha value to use for the points. This must be between 0 (completely transparent) and 1 (completely opaque), inclusive.</td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section see"><dt>See Also</dt><dd><a class="el" href="qdsp_8h.html#a7d4a0c9a9163f95dd71e1110ff8dc200">qdspSetBGColor</a> </dd>
+<dd>
+<a class="el" href="qdsp_8h.html#a53adc32f19510e7a7254b5a83f3cc502">qdspSetPointColor</a> </dd>
+<dd>
+<a class="el" href="qdsp_8h.html#a931b51e49d9d9f04727f5a02e30ddf8d">qdspSetPointSize</a> </dd></dl>
+
+</div>
+</div>
 <a class="anchor" id="a53adc32f19510e7a7254b5a83f3cc502"></a>
 <div class="memitem">
 <div class="memproto">
@@ -547,7 +604,52 @@ Functions</h2></td></tr>
   </table>
   </dd>
 </dl>
-<dl class="section see"><dt>See Also</dt><dd><a class="el" href="qdsp_8h.html#a7d4a0c9a9163f95dd71e1110ff8dc200">qdspSetBGColor</a> </dd></dl>
+<dl class="section see"><dt>See Also</dt><dd><a class="el" href="qdsp_8h.html#a7d4a0c9a9163f95dd71e1110ff8dc200">qdspSetBGColor</a> </dd>
+<dd>
+<a class="el" href="qdsp_8h.html#a3a9b4142221b821913a1f1500979a31f">qdspSetPointAlpha</a> </dd>
+<dd>
+<a class="el" href="qdsp_8h.html#a931b51e49d9d9f04727f5a02e30ddf8d">qdspSetPointSize</a> </dd></dl>
+
+</div>
+</div>
+<a class="anchor" id="a931b51e49d9d9f04727f5a02e30ddf8d"></a>
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">void qdspSetPointSize </td>
+          <td>(</td>
+          <td class="paramtype"><a class="el" href="structQDSPplot.html">QDSPplot</a> *&#160;</td>
+          <td class="paramname"><em>plot</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">int&#160;</td>
+          <td class="paramname"><em>pixels</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Sets the size of the plot points. </p>
+<p>This function sets the size of the points drawn by QDSP. Points will appear as squares of the specified width. The width parameter defaults to 1 pixel, and will be ignored in connected mode.</p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">plot</td><td>The plot to act on. </td></tr>
+    <tr><td class="paramname">pixels</td><td>The point width, in pixels.</td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section see"><dt>See Also</dt><dd><a class="el" href="qdsp_8h.html#a7d4a0c9a9163f95dd71e1110ff8dc200">qdspSetBGColor</a> </dd>
+<dd>
+<a class="el" href="qdsp_8h.html#a3a9b4142221b821913a1f1500979a31f">qdspSetPointAlpha</a> </dd>
+<dd>
+<a class="el" href="qdsp_8h.html#a53adc32f19510e7a7254b5a83f3cc502">qdspSetPointColor</a> </dd></dl>
 
 </div>
 </div>

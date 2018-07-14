@@ -9,7 +9,9 @@ var searchData=
   ['qdspsetframerate',['qdspSetFramerate',['../qdsp_8h.html#a6029ae216e906f1d55e2a9815022a93f',1,'qdsp.h']]],
   ['qdspsetgridx',['qdspSetGridX',['../qdsp_8h.html#a4ef5cd65de47e9b40ee5b1060c801b15',1,'qdsp.h']]],
   ['qdspsetgridy',['qdspSetGridY',['../qdsp_8h.html#a8ab6e92e54babc386e60134318c273f3',1,'qdsp.h']]],
+  ['qdspsetpointalpha',['qdspSetPointAlpha',['../qdsp_8h.html#a3a9b4142221b821913a1f1500979a31f',1,'qdsp.h']]],
   ['qdspsetpointcolor',['qdspSetPointColor',['../qdsp_8h.html#a53adc32f19510e7a7254b5a83f3cc502',1,'qdsp.h']]],
+  ['qdspsetpointsize',['qdspSetPointSize',['../qdsp_8h.html#a931b51e49d9d9f04727f5a02e30ddf8d',1,'qdsp.h']]],
   ['qdspupdate',['qdspUpdate',['../qdsp_8h.html#a9147cadf7ec7b1d89aa7e2af63d857c2',1,'qdsp.h']]],
   ['qdspupdateifready',['qdspUpdateIfReady',['../qdsp_8h.html#a960f4ed377ad791f7f1ed848e57dbdd7',1,'qdsp.h']]],
   ['qdspupdatewait',['qdspUpdateWait',['../qdsp_8h.html#a743a49615e3853bd2c54f1cbc9e7aae9',1,'qdsp.h']]]

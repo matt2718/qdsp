@@ -22,7 +22,6 @@ Warning: ignoring unsupported tag `PLANTUML_INCLUDE_PATH  =' at line 2367, file 
 /home/travis/build/matt2718/qdsp/include/qdsp_interface.f90:1: warning: Compound qdsp_interface::qdspSetPointColor is not documented.
 /home/travis/build/matt2718/qdsp/include/qdsp_interface.f90:1: warning: Compound qdsp_interface::qdspInit is not documented.
 /home/travis/build/matt2718/qdsp/include/qdsp.h:66: warning: Member QDSPplot (typedef) of file qdsp.h is not documented.
-/home/travis/build/matt2718/qdsp/include/qdsp.h:78: warning: unexpected token TK_EOF as the argument of ref
 /home/travis/build/matt2718/qdsp/include/qdsp_interface.f90:-1: warning: Member qdspinit(title) (function) of class qdsp_interface::qdspInit is not documented.
 /home/travis/build/matt2718/qdsp/include/qdsp_interface.f90:-1: warning: Member qdspsetbgcolor(plot, rgb) (function) of class qdsp_interface::qdspSetBGColor is not documented.
 /home/travis/build/matt2718/qdsp/include/qdsp_interface.f90:-1: warning: Member qdspsetbounds(plot, xmin, xmax, ymin, ymax) (function) of class qdsp_interface::qdspSetBounds is not documented.
@@ -175,5 +174,5 @@ Running dot for graph 2/3
 Running dot for graph 3/3
 Patching output file 1/2
 Patching output file 2/2
-lookup cache used 65/65536 hits=262 misses=65
+lookup cache used 67/65536 hits=272 misses=67
 finished...
