@@ -10,4 +10,7 @@ setup(name='qdsp',
       author_email='matthew.s.mitchell@colorado.edu',
       license='LGPL',
       packages=['qdsp'],
+      install_requires=[
+          'numpy',
+      ],
       zip_safe=False)
