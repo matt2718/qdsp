@@ -52,7 +52,7 @@ QDSPplot *qdspInit(const char *title) {
 	}
 	glfwMakeContextCurrent(plot->window);
 
-	// we need to get the plot in the key hander
+	// we need to get the plot in the key handler
 	glfwSetWindowUserPointer(plot->window, plot);
 
 	glfwSetWindowCloseCallback(plot->window, closeCallback);
@@ -271,6 +271,8 @@ QDSPplot *qdspInit(const char *title) {
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA); 
 
+	glEnable(GL_PROGRAM_POINT_SIZE);
+
 	// default to 60 fps
 	qdspSetFramerate(plot, 60);
 	
@@ -281,6 +283,10 @@ QDSPplot *qdspInit(const char *title) {
 	qdspSetConnected(plot, 0);
 	qdspSetPointColor(plot, 0xffff33);
 	qdspSetBGColor(plot, 0x000000);
+
+	// opaque points, 1 pixel wide
+	qdspSetPointAlpha(plot, 1.0);
+	qdspSetPointSize(plot, 1);
 	
 	plot->paused = 0;
 	plot->frozen = 0;
@@ -455,6 +461,20 @@ void qdspSetBounds(QDSPplot *plot, double xMin, double xMax, double yMin, double
 
 void qdspSetConnected(QDSPplot *plot, int connected) {
 	plot->connected = connected;
+}
+
+void qdspSetPointSize(QDSPplot *plot, int pixels) {
+	glfwMakeContextCurrent(plot->window);
+	
+	glUseProgram(plot->pointsProgram);
+	glUniform1i(glGetUniformLocation(plot->pointsProgram, "pointSize"), pixels);
+}
+
+void qdspSetPointAlpha(QDSPplot *plot, double alpha) {
+	glfwMakeContextCurrent(plot->window);
+	
+	glUseProgram(plot->pointsProgram);
+	glUniform1f(glGetUniformLocation(plot->pointsProgram, "alpha"), alpha);
 }
 
 void qdspSetPointColor(QDSPplot *plot, int rgb) {
