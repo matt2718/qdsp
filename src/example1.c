@@ -72,6 +72,8 @@ int main(int argc, char **argv) {
 	struct timespec startTime;
 	struct timespec endTime;
 	clock_gettime(CLOCK_MONOTONIC, &startTime);
+
+	qdspSetFramerate(plot, 120);
 	
 	int open = 1;
 	int frames = 0;
@@ -96,7 +98,7 @@ int main(int argc, char **argv) {
 		// before a frame has passed, it returns 2 without doing anything.
 		// You can block until the next frame by calling qdspUpdateWait or
 		// override the framerate cap by directly calling qdspUpdate
-		open = qdspUpdateIfReady(plot, xcoord, ycoord, color, PART_NUM);
+		open = qdspUpdateWait(plot, xcoord, ycoord, color, PART_NUM);
 		////////////////////////////////////////////////////////////
 
 		if (open == 1) frames++;

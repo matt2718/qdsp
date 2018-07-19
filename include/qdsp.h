@@ -9,6 +9,7 @@
 #ifndef _QDSP_H
 #define _QDSP_H
 
+#include <time.h>
 #include <GLFW/glfw3.h>
 
 typedef struct QDSPplot {
