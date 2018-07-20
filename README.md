@@ -12,11 +12,13 @@ backwards-compatible (until I realize that I've made an unforgivable design
 decision and end up releasing 2.0.0).
 
 ## Motivation
+
 I work in a research group that focuses on computational plasma physics. A few
 months back, I was troubleshooting some code, and I needed a way to view phase
-plots while debugging. Piping the data to gnuplot was too slow, so I hacked
-together some OpenGL to monitor my simulation in real time. This ended up being
-*really* useful, so I cleaned up the code and turned it into a library.
+plots while debugging (piping the data to gnuplot was too slow) I was learning
+OpenGL at the time, so I hacked together some code to monitor my simulation in
+real time. This ended up being *really* useful, so I cleaned it up and turned it
+into a library.
 
 ## Installation
 
@@ -51,7 +53,9 @@ header to `/usr/local/include`, and resources to `/usr/local/share/qdsp`. You
 may need to add `/usr/local/lib` to your system's ldconfig path. You can modify
 the install location by changing the `INSTPREFIX` variable in the Makefile.
 
-The python 
+The Python bindings can be installed by running `pip install .` in the `python`
+directory. You'll need to have the C library installed to actually use them.
+I'll get a PyPI package put up at some point.
 
 ## Usage
 

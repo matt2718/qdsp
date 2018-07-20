@@ -786,6 +786,8 @@ static int loadTexture(const char *relpath, int *width, int *height) {
 
 	if (width != NULL) *width = imgWidth;
 	if (height != NULL) *height = imgHeight;
+
+	return 1;
 }
 
 static void resourcePath(char *fullpath, const char *relpath) {
