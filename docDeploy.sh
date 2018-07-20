@@ -67,18 +67,32 @@ rm -rf *
 # to NO, which it is by default. So creating the file just in case.
 echo "" > .nojekyll
 
+tmpdir=$(pwd) #save directory to return to
+
+# Create C library documentation
+mkdir c
+cd c
+
 ################################################################################
 ##### Generate the Doxygen code documentation and log the output.          #####
 echo 'Generating Doxygen code documentation...'
 # Redirect both stderr and stdout to the log file AND the console.
 doxygen $DOXYFILE 2>&1 | tee doxygen.log
 
+# Create Python library documentation
+cd $TRAVIS_BUILD_DIR/python/docs
+make html
+cp -r _build/html ${tmpdir}/python
+
+cd ${tmpdir}
+
+
 ################################################################################
 ##### Upload the documentation to the gh-pages branch of the repository.   #####
 # Only upload if Doxygen successfully created the documentation.
 # Check this by verifying that the html directory and the file html/index.html
-# both exist. This is a good indication that Doxygen did it's work.
-if [ -f "index.html" ]; then
+# both exist. This is a good indication that Doxygen did its work.
+if [ -f "c/index.html" -a -f "python/index.html" ]; then
     echo 'Uploading documentation to the gh-pages branch...'
     # Add everything in this directory (the Doxygen code documentation) to the
     # gh-pages branch.

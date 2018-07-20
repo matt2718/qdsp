@@ -4,7 +4,7 @@ sudo: false
 # Blacklist
 branches:
   only:
-    - master
+    - develop
 
 # Environment variables
 env:
@@ -21,6 +21,7 @@ addons:
       - doxygen-doc
       - doxygen-gui
       - graphviz
+      - python3-sphinx
 
 # Build your code e.g. by calling make
 script:
