@@ -1,5 +1,5 @@
 CC=gcc
-CFLAGS=-std=gnu99 -fPIC -I./include -D QDSP_RESOURCE_DIR=\"$(INSTPREFIX)/share/qdsp/\"
+CFLAGS=-std=gnu99 -fPIC -I./include -D QDSP_RESOURCE_DIR=\"$(RESOURCEDIR)/\"
 LDFLAGS=-shared
 LDLIBS=-lGL -lglfw -lSOIL
 EXAMPLE_CFLAGS=-std=gnu99 -fopenmp -I./include
@@ -11,6 +11,7 @@ IMAGES=images/helpmessage.png images/digits.png
 OBJECTS=$(SOURCES:.c=.o)
 
 INSTPREFIX=/usr/local
+RESOURCEDIR=$(INSTPREFIX)/share/qdsp
 
 VPATH = src:include:shaders:resources
 
@@ -30,15 +31,15 @@ clean:
 
 .PHONY: install
 install: all qdsp.h $(SHADERS)
-	mkdir -p $(INSTPREFIX)/share/qdsp
+	mkdir -p $(RESOURCEDIR)
 	cp libqdsp.so $(INSTPREFIX)/lib
 	cp include/qdsp.h $(INSTPREFIX)/include
-	cp -r shaders images $(INSTPREFIX)/share/qdsp
+	cp -r shaders images $(RESOURCEDIR)
 	@echo "Installed successfully. You may need to run ldconfig."
 
 .PHONY: uninstall
 uninstall:
-	rm -rf $(INSTPREFIX)/share/qdsp
+	rm -rf $(RESOURCEDIR)
 	rm -f $(INSTPREFIX)/lib/libqdsp.so
 	rm -f $(INSTPREFIX)/include/qdsp.h
 

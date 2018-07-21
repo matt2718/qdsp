@@ -9,6 +9,7 @@
 #ifndef _QDSP_H
 #define _QDSP_H
 
+#include <time.h>
 #include <GLFW/glfw3.h>
 
 typedef struct QDSPplot {
@@ -107,9 +108,8 @@ void qdspRedraw(QDSPplot *plot);
  * This function sets the background color of the plot area.
  *
  * @param plot The plot to act on.
- * @param rgb The background color, as an integer. Bits 23-16 specify the red
- *   component, bits 15-8 specify the green component, and bits 7-0 specify the
- *   blue component. All components are interpreted as 8-bit unsigned integers.
+ * @param rgb The background color, as an integer corresponding to
+ *   a hexadecimal RGB triplet.
  *
  * @see @ref qdspSetPointAlpha
  * @see @ref qdspSetPointColor
@@ -150,12 +150,12 @@ void qdspSetConnected(QDSPplot *plot, int connected);
  * given point.
  * 
  * @param plot The plot to act on.
- * @param point A specific x-coordinate that a gridline should be placed at. All
- *   gridlines will be placed an integer multiple of the specified interval from
- *   this position.
+ * @param point A specific x-coordinate at which a gridline should be
+ *   placed. All gridlines will be placed an integer multiple of the
+ *   specified interval from this position.
  * @param interval The distance between gridlines.
- * @param rgb The point color. See @ref qdspSetBGColor for a description of the
- *   color format.
+ * @param rgb The background color, as an integer corresponding to a
+ *   hexadecimal RGB triplet.
  *
  * @see @ref qdspSetGridY
  */
@@ -168,12 +168,12 @@ void qdspSetGridX(QDSPplot *plot, double point, double interval, int rgb);
  * given point.
  * 
  * @param plot The plot to act on.
- * @param point A specific y-coordinate that a gridline should be placed at. All
- *   gridlines will be placed an integer multiple of the specified interval from
- *   this position.
+ * @param point A specific y-coordinate at which a gridline should be
+ *   placed. All gridlines will be placed an integer multiple of the
+ *   specified interval from this position.
  * @param interval The distance between gridlines.
- * @param rgb The point color. See @ref qdspSetBGColor for a description of the
- *   color format.
+ * @param rgb The background color, as an integer corresponding to a
+ *   hexadecimal RGB triplet.
  *
  * @see @ref qdspSetGridX
  */
@@ -247,7 +247,7 @@ void qdspSetPointSize(QDSPplot *plot, int pixels);
  * default color.
  *
  * @ref qdspUpdateIfReady should be preferred in many cases, as repeated calls
- * to qdspUpdate per frame will result in a lot of useless overhead.
+ * to qdspUpdate every frame will result in a lot of useless overhead.
  *
  * @param plot The plot to update.
  * @param x An array containing the x coordinates.
