@@ -63,7 +63,9 @@ Just put `#include <qdsp.h>` in your code and link with -lqdsp.
 
 ## Documentation
 
-API documentation is available [here](https://msmitchell.org/qdsp/).
+Documentation is available [here](https://msmitchell.org/qdsp/c/qdsp_8h.html)
+for the C API and [here](https://msmitchell.org/qdsp/python/source/qdsp.html)
+for the Python wrapper.
 
 Look at the file `src/example1.c` for a basic example of how to use QDSP (run
 `make example1` if you want to try it out). You can also look at `example2`,

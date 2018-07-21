@@ -88,7 +88,7 @@ make html
 cp -r _build/html ${tmpdir}/python
 
 cd ${tmpdir}
-
+cp $TRAVIS_BUILD_DIR/ghp-index.html ./index.html
 
 ################################################################################
 ##### Upload the documentation to the gh-pages branch of the repository.   #####
