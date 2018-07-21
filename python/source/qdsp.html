@@ -36,11 +36,312 @@
 <div class="section" id="submodules">
 <h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this headline">¶</a></h2>
 </div>
-<div class="section" id="qdsp-qdsp-module">
-<h2>qdsp.qdsp module<a class="headerlink" href="#qdsp-qdsp-module" title="Permalink to this headline">¶</a></h2>
-</div>
-<div class="section" id="module-contents">
-<h2>Module contents<a class="headerlink" href="#module-contents" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="module-qdsp.qdsp">
+<span id="qdsp-qdsp-module"></span><h2>qdsp.qdsp module<a class="headerlink" href="#module-qdsp.qdsp" title="Permalink to this headline">¶</a></h2>
+<span class="target" id="module-qdsp"></span></div>
+<div class="section" id="module-qdsp">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-qdsp" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="qdsp.QDSPplot">
+<em class="property">class </em><code class="descclassname">qdsp.</code><code class="descname">QDSPplot</code><span class="sig-paren">(</span><em>title</em><span class="sig-paren">)</span><a class="headerlink" href="#qdsp.QDSPplot" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>This class represents a plot in QDSP, acting as a wrapper for the
+underlying QDSPplot C struct.</p>
+<p>In order to see a list of plot hotkeys, press ‘h’ while the plot is running.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>title</strong> – The window title.</td>
+</tr>
+</tbody>
+</table>
+<dl class="method">
+<dt id="qdsp.QDSPplot.delete">
+<code class="descname">delete</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qdsp.QDSPplot.delete" title="Permalink to this definition">¶</a></dt>
+<dd><p>Destroys a plot.</p>
+<p>The plot object is freed and all resources are deleted.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="qdsp.QDSPplot.redraw">
+<code class="descname">redraw</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#qdsp.QDSPplot.redraw" title="Permalink to this definition">¶</a></dt>
+<dd><p>Redraws a plot.</p>
+<p>The given plot is redrawn immediately, ignoring any specified
+framerate.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="qdsp.QDSPplot.setBGColor">
+<code class="descname">setBGColor</code><span class="sig-paren">(</span><em>rgb</em><span class="sig-paren">)</span><a class="headerlink" href="#qdsp.QDSPplot.setBGColor" title="Permalink to this definition">¶</a></dt>
+<dd><p>Sets the background color</p>
+<p>This function sets the background color of the plot area.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>rgb</strong> – The background color, as an integer corresponding to a
+hexadecimal RGB triplet.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="qdsp.QDSPplot.setBounds">
+<code class="descname">setBounds</code><span class="sig-paren">(</span><em>xmin</em>, <em>xmax</em>, <em>ymin</em>, <em>ymax</em><span class="sig-paren">)</span><a class="headerlink" href="#qdsp.QDSPplot.setBounds" title="Permalink to this definition">¶</a></dt>
+<dd><p>Sets the x and y bounds of a plot</p>
+<p>This function sets the bounds of the plot window. The default bounds
+are (-1,-1) to (1,1).</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>xMin</strong> – The x coordinate of the plot’s left boundary.</li>
+<li><strong>xMax</strong> – The x coordinate of the plot’s right boundary.</li>
+<li><strong>yMin</strong> – The y coordinate of the plot’s lower boundary.</li>
+<li><strong>yMax</strong> – The y coordinate of the plot’s upper boundary.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="qdsp.QDSPplot.setConnected">
+<code class="descname">setConnected</code><span class="sig-paren">(</span><em>connected</em><span class="sig-paren">)</span><a class="headerlink" href="#qdsp.QDSPplot.setConnected" title="Permalink to this definition">¶</a></dt>
+<dd><p>Specifies whether to connect the plot points</p>
+<p>This function tells QDSP whether the points in the specified plot
+should be disconnected (to draw a scatter plot) or connected (to
+draw a line plot). Points will always be connected in the order they
+appear in in the input array.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>connected</strong> – Zero if the points should be disconnected, nonzero
+if they should be connected.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="qdsp.QDSPplot.setFramerate">
+<code class="descname">setFramerate</code><span class="sig-paren">(</span><em>framerate</em><span class="sig-paren">)</span><a class="headerlink" href="#qdsp.QDSPplot.setFramerate" title="Permalink to this definition">¶</a></dt>
+<dd><p>Caps the update framerate of a plot</p>
+<p>This function sets a framerate for updating the specified plot,
+which will be used by &#64;ref updateIfReady and &#64;ref updateWait. If the
+specified framerate is less than or equal to 0, the framerate will
+be uncapped and the aforementioned functions will behave like &#64;ref
+update when called. The default framerate is 60 FPS.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>framerate</strong> – The framerate, in frames per second.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="qdsp.QDSPplot.setGridX">
+<code class="descname">setGridX</code><span class="sig-paren">(</span><em>point</em>, <em>interval</em>, <em>rgb</em><span class="sig-paren">)</span><a class="headerlink" href="#qdsp.QDSPplot.setGridX" title="Permalink to this definition">¶</a></dt>
+<dd><p>Sets the locations of x gridlines</p>
+<p>This function determines the spacing of the x gridlines. Gridlines
+will be spaced the given interval apart, with one gridline placed
+exactly at the given point.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>point</strong> – A specific x-coordinate at which a gridline should be
+placed. All gridlines will be placed an integer
+multiple of the specified interval from this position.</li>
+<li><strong>interval</strong> – The distance between gridlines.</li>
+<li><strong>rgb</strong> – The background color, as an integer corresponding to a
+hexadecimal RGB triplet.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="qdsp.QDSPplot.setGridY">
+<code class="descname">setGridY</code><span class="sig-paren">(</span><em>point</em>, <em>interval</em>, <em>rgb</em><span class="sig-paren">)</span><a class="headerlink" href="#qdsp.QDSPplot.setGridY" title="Permalink to this definition">¶</a></dt>
+<dd><p>Sets the locations of y gridlines</p>
+<p>This function determines the spacing of the y gridlines. Gridlines
+will be spaced the given interval apart, with one gridline placed
+exactly at the given point.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>point</strong> – A specific y-coordinate at which a gridline should be
+placed. All gridlines will be placed an integer
+multiple of the specified interval from this position.</li>
+<li><strong>interval</strong> – The distance between gridlines.</li>
+<li><strong>rgb</strong> – The background color, as an integer corresponding to a
+hexadecimal RGB triplet.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="qdsp.QDSPplot.setPointAlpha">
+<code class="descname">setPointAlpha</code><span class="sig-paren">(</span><em>alpha</em><span class="sig-paren">)</span><a class="headerlink" href="#qdsp.QDSPplot.setPointAlpha" title="Permalink to this definition">¶</a></dt>
+<dd><p>Sets the point transparency</p>
+<p>This function sets the transparency of the plotted points. The
+default alpha value is 1 (opaque).</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>alpha</strong> – The alpha value to use for the points. This must be
+between 0 (completely transparent) and 1 (completely
+opaque), inclusive.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="qdsp.QDSPplot.setPointColor">
+<code class="descname">setPointColor</code><span class="sig-paren">(</span><em>rgb</em><span class="sig-paren">)</span><a class="headerlink" href="#qdsp.QDSPplot.setPointColor" title="Permalink to this definition">¶</a></dt>
+<dd><p>Sets the default point color</p>
+<p>This function sets the point color to use when no color array is
+specified during an update.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>rgb</strong> – The background color, as an integer corresponding to a
+hexadecimal RGB triplet.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="qdsp.QDSPplot.setPointSize">
+<code class="descname">setPointSize</code><span class="sig-paren">(</span><em>pixels</em><span class="sig-paren">)</span><a class="headerlink" href="#qdsp.QDSPplot.setPointSize" title="Permalink to this definition">¶</a></dt>
+<dd><p>Sets the size of the plot points</p>
+<p>This function sets the size of the points drawn by QDSP. Points will
+appear as squares of the specified width. The width parameter
+defaults to 1 pixel, and will be ignored in connected mode.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>pixels</strong> – The point width, in pixels.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="qdsp.QDSPplot.update">
+<code class="descname">update</code><span class="sig-paren">(</span><em>xvals</em>, <em>yvals</em>, <em>colors=None</em><span class="sig-paren">)</span><a class="headerlink" href="#qdsp.QDSPplot.update" title="Permalink to this definition">¶</a></dt>
+<dd><p>Updates a plot immediately.</p>
+<p>The plot is updated with the new vertex data and immediately
+redrawn, ignoring any specified framerate. If color is NULL, all
+points will be the default color.</p>
+<p>&#64;ref updateIfReady should be preferred in many cases, as repeated calls
+to update every frame will result in a lot of useless overhead.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>xvals</strong> – An array containing the x coordinates.</li>
+<li><strong>yvals</strong> – An array containing the y coordinates.</li>
+<li><strong>colors</strong> – An array containing the point colors, represented as
+integers.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">1 if the plot was updated successfully, 0 otherwise.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="qdsp.QDSPplot.updateIfReady">
+<code class="descname">updateIfReady</code><span class="sig-paren">(</span><em>xvals</em>, <em>yvals</em>, <em>colors=None</em><span class="sig-paren">)</span><a class="headerlink" href="#qdsp.QDSPplot.updateIfReady" title="Permalink to this definition">¶</a></dt>
+<dd><p>Updates a plot if enough time has passed since the last update.</p>
+<p>The plot is updated with the new vertex data and redrawn if at least
+1.0/framerate seconds have passed since the last call to &#64;ref
+update, &#64;ref updateIfReady, &#64;ref updateWait, or &#64;ref redraw in which
+the specified plot was redrawn. If color is NULL, all points will be
+the default color.</p>
+<p>This function should be used over &#64;ref update in many cases, as it
+eliminates the useless overhead of copying vertex data to the GPU
+before the monitor can be refreshed.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>x</strong> – An array containing the x coordinates.</li>
+<li><strong>y</strong> – An array containing the y coordinates.</li>
+<li><strong>colors</strong> – An array containing the point colors, represented as
+integers.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">1 if the plot was updated successfully, 2 if plot was not ready for
+an update, 0 otherwise.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="qdsp.QDSPplot.updateWait">
+<code class="descname">updateWait</code><span class="sig-paren">(</span><em>xvals</em>, <em>yvals</em>, <em>colors=None</em><span class="sig-paren">)</span><a class="headerlink" href="#qdsp.QDSPplot.updateWait" title="Permalink to this definition">¶</a></dt>
+<dd><p>Updates a plot after waiting for a new frame</p>
+<p>This function waits until at least 1.0/framerate seconds have passed
+since the last call to &#64;ref update, &#64;ref updateIfReady, &#64;ref
+updateWait, or &#64;ref redraw in which the specified plot was redrawn.
+It then updates the plot with the vertex data and redraws it. If
+color is NULL, all points will be the default color.</p>
+<p>This function is primarily useful when you wish to limit your code
+to a specific real-time update interval.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>xvals</strong> – An array containing the x coordinates.</li>
+<li><strong>yvals</strong> – An array containing the y coordinates.</li>
+<li><strong>colors</strong> – An array containing the point colors, or NULL. See</li>
+<li><strong>colors</strong> – An array containing the point colors, represented as
+integers.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">1 if the plot was updated successfully, 0 otherwise.</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
 </div>
 </div>
 
