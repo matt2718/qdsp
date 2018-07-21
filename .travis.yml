@@ -4,7 +4,7 @@ sudo: false
 # Blacklist
 branches:
   only:
-    - develop
+    - master
 
 # Environment variables
 env:
