@@ -1,13 +1,15 @@
 KEYBINDINGS:
 
-  g - Toggle grid
-  
   h - Toggle this help message
-  
-  f - Toggle freeze
-      (update calls return without redrawing)
+
+  g - Toggle grid
 
   p - Toggle pause
-      (update calls hang)
+      (update calls will hang until this
+       is turned off)
+
+  f - Toggle freeze
+      (update calls will return instantly
+       without drawing anything)
 
   q - Exit

@@ -435,6 +435,7 @@ void qdspSetFramerate(QDSPplot *plot, double framerate) {
 	if (framerate <= 0)
 		plot->frameInterval = 0;
 	else
+		// frameInterval is specified in ms
 		plot->frameInterval = 1000.0 / framerate;
 }
 
@@ -523,6 +524,7 @@ void qdspSetGridX(QDSPplot *plot, double point, double interval, int rgb) {
 		
 		int off = (i == 0); // to prevent overlap, offset bottom left by 1
 		for (int j = 0; j < 10; j++)
+			// compute position and texture data for each character
 			charHelper(&labels[36*(10*i + j)], xNorm, -1, off + j, 0, str[j]);
 	}
 
@@ -576,8 +578,9 @@ void qdspSetGridY(QDSPplot *plot, double point, double interval, int rgb) {
 		char str[11];
 		snprintf(str, 11, "% .3e", y);
 		
-		int off = (i == 0);
+		int off = (i == 0); // to prevent overlap, offset bottom left by 1
 		for (int j = 0; j < 10; j++)
+			// compute position and texture data for each character
 			charHelper(&labels[36*(10*i + j)], -1, yNorm, j, off, str[j]);
 	}
 
@@ -604,6 +607,9 @@ void qdspSetGridY(QDSPplot *plot, double point, double interval, int rgb) {
 	free(labels);
 }
 
+// each character in the grid labels requires 2 triangles with spatial and texture
+// coords. this function computes those given a character and its position in the
+// label
 static void charHelper(float *addr, float x0, float y0, int xoff, int yoff, char ch) {
 	// get location of ch in image, which contains "0123456789.+-e "
 	int charIdx;

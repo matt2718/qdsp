@@ -6,8 +6,8 @@ layout (location = 2) in vec2 st;
 
 out vec2 texCoord;
 
-uniform vec2 pixDims;
-uniform vec2 charDims;
+uniform vec2 pixDims;  // size of the window, for normalization
+uniform vec2 charDims; // size of a single character
 
 void main() {
 	texCoord = st;

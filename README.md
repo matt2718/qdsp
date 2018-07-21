@@ -1,7 +1,5 @@
 # QDSP
 
-## About
-
 QDSP, short for "Quick Dynamic Scatter Plot" (or alternatively, "Quick and Dirty
 Scatter Plot") is a lightweight C library for creating dynamic, real-time
 scatter plots. On decent hardware, it should be able to render 10^6 points every
@@ -15,7 +13,7 @@ decision and end up releasing 2.0.0).
 
 I work in a research group that focuses on computational plasma physics. A few
 months back, I was troubleshooting some code, and I needed a way to view phase
-plots while debugging (piping the data to gnuplot was too slow) I was learning
+plots while debugging (piping the data to gnuplot was too slow). I was learning
 OpenGL at the time, so I hacked together some code to monitor my simulation in
 real time. This ended up being *really* useful, so I cleaned it up and turned it
 into a library.
@@ -82,10 +80,10 @@ QDSP is licensed under the LGPL. This means you can use it for pretty much
 anything, but a modified version of the library itself can only be distributed
 under a compatible license. For more information, see the `LICENSE` file.
 
-## Author
+## Contact
 
-QDSP was primarily developed by Matt Mitchell. Please direct all questions,
-comments, and concerns to <matthew.s.mitchell@colorado.edu>.
+Please direct all questions, comments, and concerns to Matt Mitchell at
+<matthew.s.mitchell@colorado.edu>.
 
 ## Contributing
 
