@@ -21,8 +21,7 @@ addons:
       - doxygen-doc
       - doxygen-gui
       - graphviz
-      - python3-sphinx
-      - python3-alabaster
+      - python3-pip
 
 # Build your code e.g. by calling make
 script:

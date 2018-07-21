@@ -80,7 +80,10 @@ echo 'Generating Doxygen code documentation...'
 doxygen $DOXYFILE 2>&1 | tee doxygen.log
 
 # Create Python library documentation
-cd $TRAVIS_BUILD_DIR/python/docs
+pip3 install --user sphinx
+cd $TRAVIS_BUILD_DIR/python
+pip3 install --user .
+cd docs
 make html
 cp -r _build/html ${tmpdir}/python
 
