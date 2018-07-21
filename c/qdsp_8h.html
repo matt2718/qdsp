@@ -95,7 +95,8 @@ var searchBox = new SearchBox("searchBox", "search",false,'Search');
 
 <p>Functions for QDSP.  
 <a href="#details">More...</a></p>
-<div class="textblock"><code>#include &lt;GLFW/glfw3.h&gt;</code><br/>
+<div class="textblock"><code>#include &lt;time.h&gt;</code><br/>
+<code>#include &lt;GLFW/glfw3.h&gt;</code><br/>
 </div><div class="textblock"><div class="dynheader">
 Include dependency graph for qdsp.h:</div>
 <div class="dyncontent">
@@ -283,7 +284,7 @@ Functions</h2></td></tr>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">plot</td><td>The plot to act on. </td></tr>
-    <tr><td class="paramname">rgb</td><td>The background color, as an integer. Bits 23-16 specify the red component, bits 15-8 specify the green component, and bits 7-0 specify the blue component. All components are interpreted as 8-bit unsigned integers.</td></tr>
+    <tr><td class="paramname">rgb</td><td>The background color, as an integer corresponding to a hexadecimal RGB triplet.</td></tr>
   </table>
   </dd>
 </dl>
@@ -469,9 +470,9 @@ Functions</h2></td></tr>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">plot</td><td>The plot to act on. </td></tr>
-    <tr><td class="paramname">point</td><td>A specific x-coordinate that a gridline should be placed at. All gridlines will be placed an integer multiple of the specified interval from this position. </td></tr>
+    <tr><td class="paramname">point</td><td>A specific x-coordinate at which a gridline should be placed. All gridlines will be placed an integer multiple of the specified interval from this position. </td></tr>
     <tr><td class="paramname">interval</td><td>The distance between gridlines. </td></tr>
-    <tr><td class="paramname">rgb</td><td>The point color. See <a class="el" href="qdsp_8h.html#a7d4a0c9a9163f95dd71e1110ff8dc200">qdspSetBGColor</a> for a description of the color format.</td></tr>
+    <tr><td class="paramname">rgb</td><td>The background color, as an integer corresponding to a hexadecimal RGB triplet.</td></tr>
   </table>
   </dd>
 </dl>
@@ -520,9 +521,9 @@ Functions</h2></td></tr>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">plot</td><td>The plot to act on. </td></tr>
-    <tr><td class="paramname">point</td><td>A specific y-coordinate that a gridline should be placed at. All gridlines will be placed an integer multiple of the specified interval from this position. </td></tr>
+    <tr><td class="paramname">point</td><td>A specific y-coordinate at which a gridline should be placed. All gridlines will be placed an integer multiple of the specified interval from this position. </td></tr>
     <tr><td class="paramname">interval</td><td>The distance between gridlines. </td></tr>
-    <tr><td class="paramname">rgb</td><td>The point color. See <a class="el" href="qdsp_8h.html#a7d4a0c9a9163f95dd71e1110ff8dc200">qdspSetBGColor</a> for a description of the color format.</td></tr>
+    <tr><td class="paramname">rgb</td><td>The background color, as an integer corresponding to a hexadecimal RGB triplet.</td></tr>
   </table>
   </dd>
 </dl>
@@ -697,7 +698,7 @@ Functions</h2></td></tr>
 
 <p>Updates a plot immediately. </p>
 <p>The plot is updated with the new vertex data and immediately redrawn, ignoring any specified framerate. If color is NULL, all points will be the default color.</p>
-<p><a class="el" href="qdsp_8h.html#a960f4ed377ad791f7f1ed848e57dbdd7">qdspUpdateIfReady</a> should be preferred in many cases, as repeated calls to qdspUpdate per frame will result in a lot of useless overhead.</p>
+<p><a class="el" href="qdsp_8h.html#a960f4ed377ad791f7f1ed848e57dbdd7">qdspUpdateIfReady</a> should be preferred in many cases, as repeated calls to qdspUpdate every frame will result in a lot of useless overhead.</p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">plot</td><td>The plot to update. </td></tr>
